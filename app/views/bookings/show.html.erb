@@ -34,58 +34,66 @@
         <% end %>
       </div>
 
-      <div class="grid grid-cols-7 gap-1 mb-6">
-        <% @month.beginning_of_month.wday.times do %>
-          <div></div>
-        <% end %>
-        <% @calendar_days.each do |day| %>
-          <%= link_to clinic_booking_path(@clinic, month: @month.strftime("%Y-%m"), date: day[:date].iso8601, service_id: @service.id),
-                data: { turbo_frame: "slots" },
-                class: "relative flex flex-col items-center justify-center h-11 rounded-lg text-sm #{
-                  if day[:date] == @date
-                    'bg-blue-600 text-white font-semibold'
-                  elsif day[:available]
-                    'bg-white text-gray-900 hover:bg-blue-50 border border-gray-200'
-                  else
-                    'bg-gray-50 text-gray-400 border border-gray-100'
-                  end
-                }" do %>
-            <span><%= day[:date].day %></span>
-            <span class="w-1.5 h-1.5 rounded-full mt-0.5 <%= day[:date] == @date ? 'bg-white' : (day[:available] ? 'bg-green-500' : 'bg-red-400') %>"></span>
+      <div data-controller="booking-modal">
+        <div class="grid grid-cols-7 gap-1 mb-6">
+          <% @month.beginning_of_month.wday.times do %>
+            <div></div>
           <% end %>
-        <% end %>
-      </div>
+          <% @calendar_days.each do |day| %>
+            <%= link_to clinic_booking_path(@clinic, month: @month.strftime("%Y-%m"), date: day[:date].iso8601, service_id: @service.id),
+                  data: { turbo_frame: "slots", action: "click->booking-modal#open" },
+                  class: "relative flex flex-col items-center justify-center h-11 rounded-lg text-sm #{
+                    if day[:date] == @date
+                      'bg-blue-600 text-white font-semibold'
+                    elsif day[:available]
+                      'bg-white text-gray-900 hover:bg-blue-50 border border-gray-200'
+                    else
+                      'bg-gray-50 text-gray-400 border border-gray-100'
+                    end
+                  }" do %>
+              <span><%= day[:date].day %></span>
+              <span class="w-1.5 h-1.5 rounded-full mt-0.5 <%= day[:date] == @date ? 'bg-white' : (day[:available] ? 'bg-green-500' : 'bg-red-400') %>"></span>
+            <% end %>
+          <% end %>
+        </div>
 
-      <div class="flex items-center gap-4 mb-4 text-xs text-gray-500">
-        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span> May available na oras</span>
-        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span> Puno / sarado</span>
-      </div>
+        <div class="flex items-center gap-4 mb-4 text-xs text-gray-500">
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span> May available na oras</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span> Puno / sarado</span>
+        </div>
 
-      <%= turbo_frame_tag "slots" do %>
-        <% if @date.nil? %>
-          <p class="text-gray-400 text-sm text-center py-6 border border-dashed border-gray-200 rounded-lg">Pumili ng petsa sa itaas para makita ang available na oras.</p>
-        <% elsif @slots.empty? %>
-          <p class="text-gray-500 text-sm text-center py-6 border border-gray-200 rounded-lg">Sarado ang clinic sa <%= @date.strftime("%B %-d") %>.</p>
-        <% else %>
-          <div class="border border-gray-200 rounded-lg p-4">
-            <p class="text-sm font-medium text-gray-900 mb-3"><%= @date.strftime("%A, %B %-d") %></p>
-            <div class="grid grid-cols-3 gap-2">
-              <% @slots.each do |slot| %>
-                <% if slot.available %>
-                  <%= button_to slot.starts_at.strftime("%-I:%M %p"),
-                        clinic_booking_path(@clinic),
-                        params: { service_id: @service.id, starts_at: slot.starts_at.iso8601, date: @date.iso8601, month: @month.strftime("%Y-%m") },
-                        class: "bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-medium py-2 rounded-lg border border-blue-200 cursor-pointer transition" %>
+        <dialog data-booking-modal-target="dialog" class="rounded-xl p-0 backdrop:bg-black/40 w-11/12 max-w-sm">
+          <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-lg font-bold text-gray-900"><%= @date&.strftime("%A, %B %-d") || "Available na oras" %></h2>
+              <button type="button" data-action="click->booking-modal#close" class="text-gray-400 hover:text-gray-600 text-2xl leading-none cursor-pointer">&times;</button>
+            </div>
+
+            <%= turbo_frame_tag "slots" do %>
+              <% if @date.present? %>
+                <% if @slots.empty? %>
+                  <p class="text-gray-500 text-sm text-center py-6">Sarado ang clinic sa araw na ito.</p>
                 <% else %>
-                  <span class="bg-gray-50 text-gray-400 text-sm font-medium py-2 rounded-lg border border-gray-200 text-center">
-                    <%= slot.starts_at.strftime("%-I:%M %p") %>
-                  </span>
+                  <div class="grid grid-cols-3 gap-2">
+                    <% @slots.each do |slot| %>
+                      <% if slot.available %>
+                        <%= button_to slot.starts_at.strftime("%-I:%M %p"),
+                              clinic_booking_path(@clinic),
+                              params: { service_id: @service.id, starts_at: slot.starts_at.iso8601, date: @date.iso8601, month: @month.strftime("%Y-%m") },
+                              class: "bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-medium py-2 rounded-lg border border-blue-200 cursor-pointer transition" %>
+                      <% else %>
+                        <span class="bg-gray-50 text-gray-400 text-sm font-medium py-2 rounded-lg border border-gray-200 text-center">
+                          <%= slot.starts_at.strftime("%-I:%M %p") %>
+                        </span>
+                      <% end %>
+                    <% end %>
+                  </div>
                 <% end %>
               <% end %>
-            </div>
+            <% end %>
           </div>
-        <% end %>
-      <% end %>
+        </dialog>
+      </div>
     <% end %>
   <% end %>
 </div>

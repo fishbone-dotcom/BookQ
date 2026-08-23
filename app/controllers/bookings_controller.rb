@@ -16,10 +16,12 @@ class BookingsController < ApplicationController
   def create
     service = @clinic.services.find(params[:service_id])
     starts_at = parse_time(params[:starts_at])
+    staff = params[:staff_id].present? ? @clinic.staff_members.find(params[:staff_id]) : nil
 
     appointment = current_user.patient_appointments.build(
       clinic: @clinic,
       service: service,
+      staff: staff,
       starts_at: starts_at,
       ends_at: starts_at + service.duration_minutes.minutes,
       status: :pending
