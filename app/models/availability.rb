@@ -1,4 +1,6 @@
 class Availability < ApplicationRecord
+  self.skip_time_zone_conversion_for_attributes = [ :start_time, :end_time ]
+
   belongs_to :clinic
 
   enum :day_of_week, { sunday: 0, monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6 }

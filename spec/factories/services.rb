@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :service do
-    clinic { nil }
-    name { "MyString" }
-    duration_minutes { 1 }
-    price { "9.99" }
+    clinic
+    sequence(:name) { |n| "Service #{n}" }
+    duration_minutes { 30 }
+    price { "500.00" }
   end
 end

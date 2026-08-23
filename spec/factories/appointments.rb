@@ -1,12 +1,10 @@
 FactoryBot.define do
   factory :appointment do
-    patient { nil }
-    clinic { nil }
-    service { nil }
-    staff { nil }
-    starts_at { "2026-08-23 18:51:58" }
-    ends_at { "2026-08-23 18:51:58" }
-    status { 1 }
-    notes { "MyText" }
+    patient factory: :user
+    clinic
+    service
+    starts_at { 1.day.from_now.change(hour: 10, min: 0) }
+    ends_at { 1.day.from_now.change(hour: 10, min: 30) }
+    status { :pending }
   end
 end
