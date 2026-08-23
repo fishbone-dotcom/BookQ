@@ -30,6 +30,6 @@ class Appointment < ApplicationRecord
 
     overlapping = overlapping.where(staff_id: staff_id) if staff_id.present?
 
-    errors.add(:base, "overlaps with an existing appointment") if overlapping.exists?
+    errors.add(:base, "Naunahan ka na — nabook na ng iba ang oras na ito.") if overlapping.exists?
   end
 end

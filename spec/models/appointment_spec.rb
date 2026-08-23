@@ -27,7 +27,7 @@ RSpec.describe Appointment, type: :model do
         ends_at: Time.zone.parse("2026-09-01 10:45"))
 
       expect(overlapping).not_to be_valid
-      expect(overlapping.errors[:base]).to include("overlaps with an existing appointment")
+      expect(overlapping.errors[:base]).to include("Naunahan ka na — nabook na ng iba ang oras na ito.")
     end
 
     it "allows a back-to-back appointment that does not overlap" do
