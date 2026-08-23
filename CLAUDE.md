@@ -40,3 +40,7 @@ BookQ is a clinic booking SaaS: a Rails 8.1 app (SQLite, Propshaft, Hotwire/Turb
 **Testing**: RSpec + FactoryBot (not Minitest, despite `test/` still existing from `rails new` scaffolding — new specs belong in `spec/`). Devise request-spec sign-in helpers are wired in `spec/rails_helper.rb` via `Devise::Test::IntegrationHelpers` for `type: :request`.
 
 **Deployment**: Kamal is scaffolded (`config/deploy.yml`, `.kamal/`) for eventual Docker-based VPS deployment, but Docker cannot run in the current local dev sandbox (no cgroup access) — local development only uses `bin/rails server` directly.
+
+## Coding standards
+
+Read `docs/CODING_STANDARDS.md` before writing or reviewing code in this repo — it covers this project's good-code/bad-code examples, naming and structural conventions, and non-negotiable security rules (strong params, authorization scoping, query safety).
