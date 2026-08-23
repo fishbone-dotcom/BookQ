@@ -1,0 +1,15 @@
+<div class="w-full max-w-sm mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+  <h1 class="font-bold text-3xl text-gray-900 mb-2">BookQ</h1>
+  <p class="text-gray-500 text-sm mb-6">Clinic booking, walang Messenger back-and-forth.</p>
+
+  <% if user_signed_in? %>
+    <p class="mb-4 text-gray-700">Logged in as <strong><%= current_user.email %></strong></p>
+    <%= button_to "Log out", destroy_user_session_path, method: :delete, class: "w-full bg-gray-800 hover:bg-gray-900 text-white font-medium py-2 rounded-lg cursor-pointer transition" %>
+  <% else %>
+    <p class="mb-6 text-gray-500 text-sm">Wala ka pang naka-login.</p>
+    <div class="flex flex-col gap-3">
+      <%= link_to "Sign up", new_user_registration_path, class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition" %>
+      <%= link_to "Log in", new_user_session_path, class: "bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 rounded-lg transition" %>
+    </div>
+  <% end %>
+</div>
