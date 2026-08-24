@@ -19,21 +19,21 @@ phase order below — later phases depend on data models earlier phases don't ne
 Every field these pages need already exists on `Clinic`, `ClinicStaff`, `User`,
 `Service`, or `Appointment`:
 
-- [01 — Dashboard](01_dashboard.md)
-- [02 — Navigation drawer](02_navigation.md)
-- [09 — Appointments list](09_appointments_list.md)
-- [10 — Add Appointment](10_add_appointment.md)
-- [12 — Calendar View](12_calendar_view.md)
+- [x] [01 — Dashboard](01_dashboard.md) — `Staff::DashboardsController`, `7e49526`
+- [ ] [02 — Navigation drawer](02_navigation.md)
+- [ ] [09 — Appointments list](09_appointments_list.md)
+- [ ] [10 — Add Appointment](10_add_appointment.md)
+- [ ] [12 — Calendar View](12_calendar_view.md)
 
 ## Phase 2 — small migrations (new columns on existing models, no new tables)
 
-- [03 — Doctors list](03_doctors_list.md) — needs specialization/status/phone on
+- [ ] [03 — Doctors list](03_doctors_list.md) — needs specialization/status/phone on
   `ClinicStaff` (or `User`)
-- [04 — Add Doctor](04_add_doctor.md) — same, plus a photo upload
-- [05 — Patients list](05_patients_list.md) — needs birthdate/phone on `User`
-- [06 — Patient Profile](06_patient_profile.md) — needs address, blood type,
+- [ ] [04 — Add Doctor](04_add_doctor.md) — same, plus a photo upload
+- [ ] [05 — Patients list](05_patients_list.md) — needs birthdate/phone on `User`
+- [ ] [06 — Patient Profile](06_patient_profile.md) — needs address, blood type,
   allergies, emergency contact on `User`
-- [11 — Appointment Details](11_appointment_details.md) — mostly Phase 1, but the
+- [ ] [11 — Appointment Details](11_appointment_details.md) — mostly Phase 1, but the
   "Payment Status" badge needs either a stub column or should be cut until
   [15 Billing & Payments](15_billing_payments.md) exists
 
@@ -43,12 +43,12 @@ Each of these needs at least one new model/table and isn't part of BookQ's curre
 scope (per `CLAUDE.md`: a booking app, not an EMR/inventory/billing system). Treat
 these as separate feature proposals to size individually before starting:
 
-- [07 — Patient Records](07_patient_records.md) (medical records subsystem)
-- [08 — Add Medical Record](08_add_medical_record.md)
-- [13 — Reports](13_reports.md) (depends on whichever of the above exist)
-- [14 — Inventory](14_inventory.md) (new subsystem, unrelated to appointments)
-- [15 — Billing & Payments](15_billing_payments.md) (new subsystem)
-- [16 — Settings](16_settings.md) (mixed — some rows map to real features like
+- [ ] [07 — Patient Records](07_patient_records.md) (medical records subsystem)
+- [ ] [08 — Add Medical Record](08_add_medical_record.md)
+- [ ] [13 — Reports](13_reports.md) (depends on whichever of the above exist)
+- [ ] [14 — Inventory](14_inventory.md) (new subsystem, unrelated to appointments)
+- [ ] [15 — Billing & Payments](15_billing_payments.md) (new subsystem)
+- [ ] [16 — Settings](16_settings.md) (mixed — some rows map to real features like
   Working Hours/`Availability`, others like Backup & Restore don't exist anywhere
   in the app yet)
 
