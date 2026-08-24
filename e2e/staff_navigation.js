@@ -26,8 +26,9 @@ const path = require("path");
   await pause();
 
   check("Dashboard is a real, highlighted link in the drawer", await page.locator('aside a:has-text("Dashboard")').count() > 0);
+  check("Appointments is a real link in the drawer", await page.locator('aside a:has-text("Appointments")').count() > 0);
 
-  const placeholderLabels = [ "Appointments", "Doctors", "Patients", "Patient Records", "Billing & Payments", "Inventory", "Reports", "Notifications", "Settings" ];
+  const placeholderLabels = [ "Doctors", "Patients", "Patient Records", "Billing & Payments", "Inventory", "Reports", "Notifications", "Settings" ];
   let allPlaceholders = true;
   for (const label of placeholderLabels) {
     const isLink = await page.locator(`aside a:has-text("${label}")`).count() > 0;

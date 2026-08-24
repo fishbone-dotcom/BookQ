@@ -18,6 +18,7 @@ Rails.application.routes.draw do
   namespace :staff do
     resource :dashboard, only: [ :show ]
     resource :active_clinic, only: [ :update ]
+    resources :appointments, only: [ :index ]
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

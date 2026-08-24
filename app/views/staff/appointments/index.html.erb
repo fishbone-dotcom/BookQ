@@ -1,0 +1,64 @@
+<% content_for(:page_title, "Appointments") %>
+
+<div class="flex items-center justify-between mb-1">
+  <%= link_to staff_appointments_path(date: (@week_start - 7.days).iso8601, status: @status),
+        class: "text-emerald-600 hover:underline text-sm py-2 px-1 -mx-1" do %>
+    ← <%= (@week_start - 7.days).strftime("%b") %>
+  <% end %>
+  <span class="font-semibold text-gray-900"><%= @date.strftime("%B %Y") %></span>
+  <%= link_to staff_appointments_path(date: (@week_start + 7.days).iso8601, status: @status),
+        class: "text-emerald-600 hover:underline text-sm py-2 px-1 -mx-1" do %>
+    <%= (@week_start + 7.days).strftime("%b") %> →
+  <% end %>
+</div>
+
+<div class="grid grid-cols-7 gap-1 mb-4">
+  <% @week_days.each do |day| %>
+    <%= link_to staff_appointments_path(date: day.iso8601, status: @status),
+          class: "flex flex-col items-center gap-0.5 py-2 rounded-lg text-sm #{day == @date ? "bg-emerald-600 text-white font-semibold" : "text-gray-700 hover:bg-gray-100"}" do %>
+      <span class="text-[10px] uppercase <%= day == @date ? "text-emerald-100" : "text-gray-400" %>"><%= day.strftime("%a") %></span>
+      <span><%= day.day %></span>
+    <% end %>
+  <% end %>
+</div>
+
+<div class="flex items-center justify-between mb-3">
+  <div class="flex gap-2 overflow-x-auto">
+    <% Staff::AppointmentsController::STATUSES.each do |status| %>
+      <%= link_to status.capitalize, staff_appointments_path(date: @date.iso8601, status: status),
+            class: "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap #{@status == status ? "bg-emerald-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}" %>
+    <% end %>
+  </div>
+  <span class="w-8 h-8 rounded-full bg-gray-100 text-gray-300 flex items-center justify-center shrink-0 ml-2" title="Add Appointment — coming soon">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+  </span>
+</div>
+
+<% if @appointments.empty? %>
+  <div class="bg-white border border-gray-200 rounded-xl p-4 text-center text-sm text-gray-500 shadow-sm">
+    No appointments for this day.
+  </div>
+<% else %>
+  <div class="flex flex-col gap-2">
+    <% @appointments.each do |appointment| %>
+      <div class="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm">
+        <div class="text-xs font-semibold text-gray-700 w-16 shrink-0"><%= appointment.starts_at.strftime("%I:%M %p") %></div>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-semibold text-gray-900 truncate"><%= appointment.patient.display_name %></p>
+          <p class="text-xs text-gray-500 truncate">
+            <%= appointment.service.name %>
+            <% if appointment.staff %> &middot; <%= appointment.staff.display_name %><% end %>
+          </p>
+        </div>
+        <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-medium shrink-0 <%=
+          case appointment.status
+          when "pending" then "bg-yellow-50 text-yellow-700"
+          when "confirmed" then "bg-green-50 text-green-700"
+          when "cancelled" then "bg-red-50 text-red-700"
+          else "bg-gray-100 text-gray-600"
+          end
+        %>"><%= appointment.status %></span>
+      </div>
+    <% end %>
+  </div>
+<% end %>
