@@ -51,6 +51,45 @@ RSpec.describe "Staff::Calendars", type: :request do
       expect(response.body).not_to include("1 PM") # outside the 9-12 availability window
     end
 
+    it "renders overlapping appointment cards as a single compact line, not two" do
+      staffer = create(:user)
+      clinic = create(:clinic)
+      create(:clinic_staff, clinic: clinic, user: staffer)
+      service = create(:service, clinic: clinic, duration_minutes: 15)
+      staff_a = create(:user)
+      staff_b = create(:user)
+      monday = Date.current.next_occurring(:monday)
+      create(:availability, clinic: clinic, day_of_week: :monday, start_time: "09:00", end_time: "17:00")
+
+      create(:appointment, clinic: clinic, service: service, staff: staff_a,
+        starts_at: monday.in_time_zone.change(hour: 10), ends_at: monday.in_time_zone.change(hour: 10, min: 15))
+      create(:appointment, clinic: clinic, service: service, staff: staff_b,
+        starts_at: monday.in_time_zone.change(hour: 10, min: 5), ends_at: monday.in_time_zone.change(hour: 10, min: 20))
+
+      sign_in staffer
+      get staff_calendar_path(date: monday.iso8601)
+
+      expect(response.body).not_to include("text-[10px] font-semibold truncate leading-tight")
+      expect(response.body.scan("text-[9px] font-semibold truncate leading-tight").count).to eq(2)
+    end
+
+    it "keeps the two-line layout for an appointment with no overlap" do
+      staffer = create(:user)
+      clinic = create(:clinic)
+      create(:clinic_staff, clinic: clinic, user: staffer)
+      service = create(:service, clinic: clinic)
+      monday = Date.current.next_occurring(:monday)
+      create(:availability, clinic: clinic, day_of_week: :monday, start_time: "09:00", end_time: "17:00")
+
+      create(:appointment, clinic: clinic, service: service,
+        starts_at: monday.in_time_zone.change(hour: 10), ends_at: monday.in_time_zone.change(hour: 10, min: 30))
+
+      sign_in staffer
+      get staff_calendar_path(date: monday.iso8601)
+
+      expect(response.body).to include("text-[10px] font-semibold truncate leading-tight")
+    end
+
     it "excludes cancelled appointments" do
       staffer = create(:user)
       clinic = create(:clinic)
