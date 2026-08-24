@@ -25,14 +25,11 @@ const path = require("path");
   await page.waitForLoadState("networkidle");
   await pause();
 
-  // 3. A clinic staffer sees their dashboard.
+  // 3. A clinic staffer is sent straight to their dashboard on login — no
+  // detour through the patient home page required.
   await signIn(page, baseUrl, "owner@bookq.test", "password123");
-  await pause();
-  await page.goto(`${baseUrl}/staff/dashboard`);
-  await page.waitForLoadState("networkidle");
   await page.waitForTimeout(300);
-
-  check("staff dashboard loads at the right URL", page.url() === `${baseUrl}/staff/dashboard`);
+  check("signing in as a clinic staffer lands directly on the staff dashboard", page.url() === `${baseUrl}/staff/dashboard`);
   check("header shows 'Dashboard'", await page.locator("h1", { hasText: "Dashboard" }).count() > 0);
   check("greeting includes the staffer's name", (await page.locator("body").innerText()).includes("Dr. Maria Santos"));
 

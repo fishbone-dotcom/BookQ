@@ -7,7 +7,7 @@ module Staff
 
     def set_clinic
       @clinic = current_user.clinics.first
-      redirect_to root_path, alert: "You are not staff at any clinic." if @clinic.nil?
+      redirect_to root_path if @clinic.nil?
     end
   end
 end

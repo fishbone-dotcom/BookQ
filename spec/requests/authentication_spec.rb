@@ -45,5 +45,16 @@ RSpec.describe "Authentication", type: :request do
 
       expect(response).to have_http_status(:unprocessable_content)
     end
+
+    it "sends a clinic staffer straight to their staff dashboard instead of the patient home page" do
+      staffer = create(:user, password: "password123", password_confirmation: "password123")
+      create(:clinic_staff, user: staffer)
+
+      post user_session_path, params: {
+        user: { email: staffer.email, password: "password123" }
+      }
+
+      expect(response).to redirect_to(staff_dashboard_path)
+    end
   end
 end
