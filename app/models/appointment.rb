@@ -41,13 +41,13 @@ class Appointment < ApplicationRecord
 
     overlapping = overlapping.where(staff_id: staff_id) if staff_id.present?
 
-    errors.add(:base, "Naunahan ka na — nabook na ng iba ang oras na ito.") if overlapping.exists?
+    errors.add(:base, "Someone else just booked that time — please pick a different one.") if overlapping.exists?
   end
 
   def patient_has_no_other_active_appointment
     return if patient_id.blank? || !active?
 
     has_active = Appointment.active.where(patient_id: patient_id).where.not(id: id).exists?
-    errors.add(:base, "May aktibo ka nang booking. Isang aktibong booking lang ang pinapayagan kada patient.") if has_active
+    errors.add(:base, "You already have an active booking. Only one active booking is allowed per patient.") if has_active
   end
 end

@@ -1,10 +1,11 @@
 class SlotFinder
   Slot = Struct.new(:starts_at, :ends_at, :available, keyword_init: true)
 
-  def initialize(clinic:, service:, date:)
+  def initialize(clinic:, service:, date:, exclude_appointment_id: nil)
     @clinic = clinic
     @service = service
     @date = date
+    @exclude_appointment_id = exclude_appointment_id
   end
 
   def slots
@@ -30,17 +31,20 @@ class SlotFinder
 
   private
 
-  attr_reader :clinic, :service, :date
+  attr_reader :clinic, :service, :date, :exclude_appointment_id
 
   def availability
     @availability ||= clinic.availabilities.find_by(day_of_week: date.wday)
   end
 
   def booked_ranges
-    @booked_ranges ||= clinic.appointments
-      .where(starts_at: date.in_time_zone.beginning_of_day..date.in_time_zone.end_of_day)
-      .where.not(status: :cancelled)
-      .pluck(:starts_at, :ends_at)
+    @booked_ranges ||= begin
+      scope = clinic.appointments
+        .where(starts_at: date.in_time_zone.beginning_of_day..date.in_time_zone.end_of_day)
+        .where.not(status: :cancelled)
+      scope = scope.where.not(id: exclude_appointment_id) if exclude_appointment_id
+      scope.pluck(:starts_at, :ends_at)
+    end
   end
 
   def overlaps_booked?(slot_start, slot_end)

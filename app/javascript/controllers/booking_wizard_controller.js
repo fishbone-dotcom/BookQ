@@ -75,7 +75,7 @@ export default class extends Controller {
 
   renderSummary() {
     const staffChecked = this.bookingFormTarget.querySelector('input[name="staff_id"]:checked')
-    this.summaryStaffTarget.textContent = staffChecked?.dataset.name || "Kahit sino / Walang partikular"
+    this.summaryStaffTarget.textContent = staffChecked?.dataset.name || "Anyone / No preference"
 
     const dateCell = this.dateCellTargets.find((el) => el.dataset.date === this.hiddenDateTarget.value)
     this.summaryDateTarget.textContent = dateCell ? dateCell.dataset.label : "—"

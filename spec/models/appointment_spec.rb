@@ -27,7 +27,7 @@ RSpec.describe Appointment, type: :model do
         ends_at: Time.zone.parse("2026-09-01 10:45"))
 
       expect(overlapping).not_to be_valid
-      expect(overlapping.errors[:base]).to include("Naunahan ka na — nabook na ng iba ang oras na ito.")
+      expect(overlapping.errors[:base]).to include("Someone else just booked that time — please pick a different one.")
     end
 
     it "allows a back-to-back appointment that does not overlap" do
@@ -110,7 +110,7 @@ RSpec.describe Appointment, type: :model do
         ends_at: 2.days.from_now.change(hour: 10, min: 30))
 
       expect(second).not_to be_valid
-      expect(second.errors[:base]).to include("May aktibo ka nang booking. Isang aktibong booking lang ang pinapayagan kada patient.")
+      expect(second.errors[:base]).to include("You already have an active booking. Only one active booking is allowed per patient.")
     end
 
     it "allows a new appointment once the patient's previous one is cancelled" do

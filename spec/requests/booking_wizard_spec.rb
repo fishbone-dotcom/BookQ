@@ -21,7 +21,7 @@ RSpec.describe "Booking wizard", type: :request do
     expect(response.body).to include('name="staff_id"')
     expect(response.body).to include("Dr. Juan Dela Cruz")
     expect(response.body).to include("Staff")
-    expect(response.body).to include("Kahit sino")
+    expect(response.body).to include("Anyone")
     expect(response.body).to include('data-booking-wizard-target="progressLine"')
     expect(response.body).not_to include("blue-")
   end
@@ -32,7 +32,7 @@ RSpec.describe "Booking wizard", type: :request do
 
     get clinic_booking_path(clinic)
 
-    expect(response.body).to include("May-ari ng Clinic")
+    expect(response.body).to include("Clinic Owner")
   end
 
   it "shows a Total Amount row on the confirm step when the service has a price" do

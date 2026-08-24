@@ -4,7 +4,7 @@
   <% end %>
 
   <h1 class="text-2xl font-bold text-gray-900 mb-1">Admin Dashboard</h1>
-  <p class="text-gray-500 text-sm mb-6">System-wide na overview ng BookQ.</p>
+  <p class="text-gray-500 text-sm mb-6">System-wide overview of BookQ.</p>
 
   <div class="grid grid-cols-3 gap-3 mb-3">
     <div class="bg-white border border-gray-200 rounded-lg px-4 py-3">
@@ -48,16 +48,16 @@
     <% end %>
   </div>
 
-  <h2 class="text-sm font-semibold text-gray-700 mb-3">Lahat ng appointments</h2>
+  <h2 class="text-sm font-semibold text-gray-700 mb-3">All appointments</h2>
 
   <% if @appointments.empty? %>
-    <p class="text-gray-500 text-sm">Wala pang appointments.</p>
+    <p class="text-gray-500 text-sm">No appointments yet.</p>
   <% else %>
     <div class="overflow-x-auto border border-gray-200 rounded-lg">
       <table class="w-full text-sm text-left">
         <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
           <tr>
-            <th class="px-3 py-2">Petsa</th>
+            <th class="px-3 py-2">Date</th>
             <th class="px-3 py-2">Clinic</th>
             <th class="px-3 py-2">Patient</th>
             <th class="px-3 py-2">Service</th>

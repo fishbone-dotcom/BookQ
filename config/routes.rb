@@ -5,7 +5,7 @@ Rails.application.routes.draw do
     resource :booking, only: [ :show, :create ], controller: "bookings"
   end
 
-  resources :appointments, only: [] do
+  resources :appointments, only: [ :update ] do
     member do
       patch :cancel
     end

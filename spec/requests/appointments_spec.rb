@@ -12,7 +12,7 @@ RSpec.describe "Appointments", type: :request do
       patch cancel_appointment_path(appointment)
 
       expect(appointment.reload.status).to eq("cancelled")
-      expect(response).to redirect_to(clinic_booking_path(clinic, service_id: service.id))
+      expect(response).to redirect_to(root_path)
     end
 
     it "does not let a patient cancel another patient's appointment" do

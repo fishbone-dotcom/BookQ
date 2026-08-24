@@ -12,7 +12,7 @@ RSpec.describe "Bookings", type: :request do
   end
 
   describe "POST /clinics/:clinic_id/booking" do
-    it "books the appointment and redirects without the date param, so the modal stays closed" do
+    it "books the appointment and redirects to the home page" do
       starts_at = monday.in_time_zone.change(hour: 9, min: 0)
 
       expect {
@@ -21,9 +21,9 @@ RSpec.describe "Bookings", type: :request do
         }
       }.to change(Appointment, :count).by(1)
 
-      expect(response).to redirect_to(clinic_booking_path(clinic, service_id: service.id, month: monday.strftime("%Y-%m")))
+      expect(response).to redirect_to(root_path)
       follow_redirect!
-      expect(response.body).to include("Na-book na ang appointment mo")
+      expect(response.body).to include("Your appointment is booked")
     end
 
     it "redirects back with the date preserved when the patient already has an active booking" do
@@ -38,7 +38,7 @@ RSpec.describe "Bookings", type: :request do
         clinic_booking_path(clinic, service_id: service.id, month: monday.strftime("%Y-%m"), date: monday.iso8601)
       )
       follow_redirect!
-      expect(response.body).to include("May aktibo ka nang booking")
+      expect(response.body).to include("You already have an active booking")
     end
 
     it "redirects back with the date preserved when no time was selected" do
@@ -50,7 +50,7 @@ RSpec.describe "Bookings", type: :request do
         clinic_booking_path(clinic, service_id: service.id, month: monday.strftime("%Y-%m"), date: monday.iso8601)
       )
       follow_redirect!
-      expect(response.body).to include("Pumili muna ng oras")
+      expect(response.body).to include("Please select a time first")
     end
   end
 end
