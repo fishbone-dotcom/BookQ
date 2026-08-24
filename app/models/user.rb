@@ -11,4 +11,8 @@ class User < ApplicationRecord
   has_many :owned_clinics, class_name: "Clinic", foreign_key: :owner_id, dependent: :destroy, inverse_of: :owner
   has_many :patient_appointments, class_name: "Appointment", foreign_key: :patient_id, dependent: :destroy, inverse_of: :patient
   has_many :staff_appointments, class_name: "Appointment", foreign_key: :staff_id, dependent: :nullify, inverse_of: :staff
+
+  def display_name
+    name.presence || email
+  end
 end

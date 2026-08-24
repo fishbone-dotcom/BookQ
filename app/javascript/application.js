@@ -10,7 +10,7 @@ Turbo.config.forms.confirm = (message) => {
       <p class="text-gray-900 text-sm mb-5">${message}</p>
       <div class="flex gap-3">
         <button type="button" data-choice="discard" class="flex-1 border border-gray-300 text-gray-700 font-medium py-2 rounded-lg cursor-pointer hover:bg-gray-50">I-discard</button>
-        <button type="button" data-choice="ok" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg cursor-pointer">OK</button>
+        <button type="button" data-choice="ok" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg cursor-pointer">OK</button>
       </div>
     `
 

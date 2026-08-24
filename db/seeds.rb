@@ -35,6 +35,9 @@ end
 ClinicStaff.find_or_create_by!(clinic: clinic, user: owner) { |cs| cs.role = :owner }
 ClinicStaff.find_or_create_by!(clinic: clinic, user: doctor) { |cs| cs.role = :staff }
 
+owner.update!(name: "Dr. Maria Santos")
+doctor.update!(name: "Dr. Juan Dela Cruz")
+
 checkup = Service.find_or_create_by!(clinic: clinic, name: "General Check-up") do |s|
   s.duration_minutes = 30
   s.price = 500

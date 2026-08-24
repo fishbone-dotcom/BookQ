@@ -1,4 +1,4 @@
-<div class="w-full max-w-2xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+<div class="w-full max-w-2xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-8">
   <%= link_to root_path, class: "inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4" do %>
     ← Back
   <% end %>
@@ -7,7 +7,7 @@
   <p class="text-gray-500 text-sm mb-6"><%= @clinic.address %></p>
 
   <% if @active_appointment %>
-    <div class="bg-blue-50 border border-blue-200 text-blue-700 rounded-lg px-4 py-3 text-sm">
+    <div class="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg px-4 py-3 text-sm">
       <p class="mb-3">
         May aktibo ka nang booking (<%= @active_appointment.service.name %> sa <%= @active_appointment.clinic.name %>,
         <%= I18n.l(@active_appointment.starts_at, format: :long) %>). Isang aktibong booking lang ang pinapayagan kada patient —
@@ -15,94 +15,163 @@
       </p>
       <%= button_to "Kanselahin ang booking", cancel_appointment_path(@active_appointment), method: :patch,
             data: { turbo_confirm: "Sigurado ka bang gusto mong kanselahin ang booking na ito? Hindi na ito mababawi." },
-            class: "bg-white border border-blue-300 text-blue-700 font-medium px-4 py-2 rounded-lg text-sm cursor-pointer hover:bg-blue-100 transition" %>
+            class: "bg-white border border-emerald-300 text-emerald-700 font-medium px-4 py-2 rounded-lg text-sm cursor-pointer hover:bg-emerald-100 transition" %>
     </div>
   <% elsif @services.empty? %>
     <p class="text-gray-500 text-sm">Wala pang service ang clinic na ito.</p>
+  <% elsif @service.nil? %>
+    <p class="text-gray-500 text-sm">Wala pang service ang clinic na ito.</p>
   <% else %>
-    <%= form_with url: clinic_booking_path(@clinic), method: :get, class: "mb-6" do |f| %>
-      <%= f.label :service_id, "Service", class: "block text-sm font-medium text-gray-700 mb-1" %>
-      <%= f.select :service_id,
-            @services.map { |s| ["#{s.name} (#{s.duration_minutes} min)", s.id] },
-            { selected: @service&.id },
-            class: "w-full rounded-lg border border-gray-300 px-3 py-2",
-            onchange: "this.form.requestSubmit()" %>
-      <%= f.hidden_field :month, value: @month.strftime("%Y-%m") %>
-    <% end %>
+    <div data-controller="booking-wizard" data-booking-wizard-step-value="<%= @date.present? ? 3 : (params[:service_id].present? ? 2 : 1) %>">
 
-    <div class="flex items-center justify-between mb-3">
-      <%= link_to "← #{(@month - 1.month).strftime('%b')}", clinic_booking_path(@clinic, month: (@month - 1.month).strftime("%Y-%m"), service_id: @service&.id), class: "text-blue-600 hover:underline text-sm" %>
-      <span class="font-semibold text-gray-900"><%= @month.strftime("%B %Y") %></span>
-      <%= link_to "#{(@month + 1.month).strftime('%b')} →", clinic_booking_path(@clinic, month: (@month + 1.month).strftime("%Y-%m"), service_id: @service&.id), class: "text-blue-600 hover:underline text-sm" %>
-    </div>
-
-    <% if @service.nil? %>
-      <p class="text-gray-500 text-sm">Wala pang service ang clinic na ito.</p>
-    <% else %>
-      <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-400 mb-1">
-        <% %w[Sun Mon Tue Wed Thu Fri Sat].each do |d| %>
-          <div><%= d %></div>
+      <!-- Step indicator -->
+      <div class="flex justify-between mb-8">
+        <% [ [ 1, "Serbisyo" ], [ 2, "Doktor" ], [ 3, "Iskedyul" ], [ 4, "Kumpirma" ] ].each do |step, label| %>
+          <div data-booking-wizard-target="stepIndicator" data-step="<%= step %>" class="flex flex-col items-center gap-1 flex-1">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold step-circle">
+              <%= step %>
+            </div>
+            <span class="text-[11px] text-gray-500 step-label"><%= label %></span>
+          </div>
         <% end %>
       </div>
 
-      <div data-controller="booking-modal" data-booking-modal-open-value="<%= @date.present? %>">
-        <div class="grid grid-cols-7 gap-1 mb-6">
-          <% @month.beginning_of_month.wday.times do %>
-            <div></div>
+      <!-- Step 1: Serbisyo (own GET form — changing service needs a real reload) -->
+      <div data-booking-wizard-target="stepPanel" data-step="1">
+        <%= form_with url: clinic_booking_path(@clinic), method: :get, data: { "booking-wizard-target": "serviceForm" }, class: "flex flex-col gap-2" do |f| %>
+          <% @services.each do |service| %>
+            <label class="group relative flex items-center justify-between gap-3 border border-gray-200 rounded-lg px-4 py-3 cursor-pointer has-checked:border-emerald-600 has-checked:bg-emerald-50 transition">
+              <input type="radio" name="service_id" value="<%= service.id %>" class="sr-only" <%= "checked" if service == @service %>>
+              <span>
+                <span class="block text-sm font-medium text-gray-900"><%= service.name %></span>
+                <span class="block text-xs text-gray-500">
+                  <%= service.duration_minutes %> min
+                  <% if service.price.present? %> &middot; <%= number_to_currency(service.price, unit: "₱", precision: 2) %><% end %>
+                </span>
+              </span>
+              <span class="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center flex-none text-xs text-transparent group-has-checked:bg-emerald-600 group-has-checked:border-emerald-600 group-has-checked:text-white">✓</span>
+            </label>
           <% end %>
-          <% @calendar_days.each do |day| %>
-            <%= link_to clinic_booking_path(@clinic, month: @month.strftime("%Y-%m"), date: day[:date].iso8601, service_id: @service.id),
-                  data: { turbo_frame: "slots", action: "click->booking-modal#open" },
-                  class: "relative flex flex-col items-center justify-center h-11 rounded-lg text-sm #{
-                    if day[:date] == @date
-                      'bg-blue-600 text-white font-semibold'
-                    elsif day[:available]
-                      'bg-white text-gray-900 hover:bg-blue-50 border border-gray-200'
-                    else
-                      'bg-gray-50 text-gray-400 border border-gray-100'
-                    end
-                  }" do %>
-              <span><%= day[:date].day %></span>
-              <span class="w-1.5 h-1.5 rounded-full mt-0.5 <%= day[:date] == @date ? 'bg-white' : (day[:available] ? 'bg-green-500' : 'bg-red-400') %>"></span>
+          <%= f.hidden_field :month, value: @month.strftime("%Y-%m") %>
+          <%= f.hidden_field :staff_id, value: @staff_id %>
+        <% end %>
+      </div>
+
+      <%= form_with url: clinic_booking_path(@clinic), method: :post, data: { "booking-wizard-target": "bookingForm", turbo_frame: "_top" } do |f| %>
+        <%= f.hidden_field :service_id, value: @service.id %>
+        <%= f.hidden_field :month, value: @month.strftime("%Y-%m") %>
+        <%= f.hidden_field :date, value: @date&.iso8601, data: { "booking-wizard-target": "hiddenDate" } %>
+
+        <!-- Step 2: Doktor (client-side only — availability isn't per-doctor yet) -->
+        <div data-booking-wizard-target="stepPanel" data-step="2" class="flex flex-col gap-2">
+          <label class="relative flex items-center gap-3 border border-gray-200 rounded-lg px-4 py-3 cursor-pointer has-checked:border-emerald-600 has-checked:bg-emerald-50 transition">
+            <input type="radio" name="staff_id" value="" class="sr-only" data-name="Kahit sino" <%= "checked" if @staff_id.blank? %>>
+            <span class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 flex-none">?</span>
+            <span class="text-sm font-medium text-gray-900">Kahit sino / Walang partikular</span>
+          </label>
+          <% @staff_members.each do |staff| %>
+            <label class="relative flex items-center gap-3 border border-gray-200 rounded-lg px-4 py-3 cursor-pointer has-checked:border-emerald-600 has-checked:bg-emerald-50 transition">
+              <input type="radio" name="staff_id" value="<%= staff.id %>" class="sr-only" data-name="<%= staff.display_name %>" <%= "checked" if @staff_id == staff.id.to_s %>>
+              <span class="w-9 h-9 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm font-semibold flex-none"><%= staff.display_name.first.upcase %></span>
+              <span class="text-sm font-medium text-gray-900"><%= staff.display_name %></span>
+            </label>
+          <% end %>
+        </div>
+
+        <!-- Step 3: Iskedyul -->
+        <div data-booking-wizard-target="stepPanel" data-step="3">
+          <div class="flex items-center justify-between mb-3">
+            <%= link_to "← #{(@month - 1.month).strftime('%b')}", clinic_booking_path(@clinic, month: (@month - 1.month).strftime("%Y-%m"), service_id: @service.id, staff_id: @staff_id), class: "text-emerald-600 hover:underline text-sm py-2 px-1 -mx-1" %>
+            <span class="font-semibold text-gray-900"><%= @month.strftime("%B %Y") %></span>
+            <%= link_to "#{(@month + 1.month).strftime('%b')} →", clinic_booking_path(@clinic, month: (@month + 1.month).strftime("%Y-%m"), service_id: @service.id, staff_id: @staff_id), class: "text-emerald-600 hover:underline text-sm py-2 px-1 -mx-1" %>
+          </div>
+
+          <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-400 mb-1">
+            <% %w[Sun Mon Tue Wed Thu Fri Sat].each do |d| %>
+              <div><%= d %></div>
             <% end %>
-          <% end %>
-        </div>
+          </div>
 
-        <div class="flex items-center gap-4 mb-4 text-xs text-gray-500">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span> May available na oras</span>
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span> Puno / sarado</span>
-        </div>
-
-        <dialog data-booking-modal-target="dialog" data-action="click->booking-modal#closeOnBackdrop" class="m-auto rounded-xl p-0 backdrop:bg-black/40 w-11/12 max-w-sm">
-          <div class="p-6">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-lg font-bold text-gray-900"><%= @date&.strftime("%A, %B %-d") || "Available na oras" %></h2>
-              <button type="button" data-action="click->booking-modal#close" class="text-gray-400 hover:text-gray-600 text-2xl leading-none cursor-pointer">&times;</button>
-            </div>
-
-            <%= turbo_frame_tag "slots" do %>
-              <% if flash[:alert].present? %>
-                <p class="bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2 text-sm mb-3"><%= flash[:alert] %></p>
-              <% end %>
-
-              <% if @date.present? %>
-                <% available_slots = @slots.select(&:available).map { |s| [s.starts_at.strftime("%-I:%M %p"), s.starts_at.iso8601] }.uniq { |_, value| value } %>
-                <% if available_slots.empty? %>
-                  <p class="text-gray-500 text-sm text-center py-6">Walang available na oras sa araw na ito.</p>
-                <% else %>
-                  <%= form_with url: clinic_booking_path(@clinic), method: :post, data: { turbo_frame: "_top" }, class: "flex flex-col gap-3" do |f| %>
-                    <%= f.select :starts_at, available_slots, {}, class: "w-full rounded-lg border border-gray-300 px-3 py-2" %>
-                    <%= f.hidden_field :service_id, value: @service.id %>
-                    <%= f.hidden_field :date, value: @date.iso8601 %>
-                    <%= f.hidden_field :month, value: @month.strftime("%Y-%m") %>
-                    <%= f.submit "I-book", data: { turbo_confirm: "Hindi na mapapalitan ang booking na ito kapag na-confirm. Sigurado ka ba?" }, class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg cursor-pointer transition" %>
-                  <% end %>
-                <% end %>
+          <div class="grid grid-cols-7 gap-1 mb-4">
+            <% @month.beginning_of_month.wday.times do %>
+              <div></div>
+            <% end %>
+            <% @calendar_days.each do |day| %>
+              <% resting_class = day[:available] ? "bg-white text-gray-900 hover:bg-emerald-50 border border-gray-200" : "bg-gray-50 text-gray-400 border border-gray-100" %>
+              <% resting_dot_class = day[:available] ? "bg-green-500" : "bg-red-400" %>
+              <%= link_to clinic_booking_path(@clinic, month: @month.strftime("%Y-%m"), date: day[:date].iso8601, service_id: @service.id, staff_id: @staff_id),
+                    data: { turbo_frame: "slots", action: "click->booking-wizard#selectDate", date: day[:date].iso8601, label: day[:date].strftime("%A, %B %-d"), "resting-class": resting_class },
+                    "data-booking-wizard-target": "dateCell",
+                    class: "relative flex flex-col items-center justify-center h-11 rounded-lg text-sm #{day[:date] == @date ? 'bg-emerald-600 text-white font-semibold' : resting_class}" do %>
+                <span><%= day[:date].day %></span>
+                <span class="avail-dot w-1.5 h-1.5 rounded-full mt-0.5 <%= day[:date] == @date ? 'bg-white' : resting_dot_class %>" data-resting-class="<%= resting_dot_class %>"></span>
               <% end %>
             <% end %>
           </div>
-        </dialog>
-      </div>
-    <% end %>
+
+          <div class="flex items-center gap-4 mb-4 text-xs text-gray-500">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span> May available na oras</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span> Puno / sarado</span>
+          </div>
+
+          <%= turbo_frame_tag "slots" do %>
+            <% if flash[:alert].present? %>
+              <p class="bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2 text-sm mb-3"><%= flash[:alert] %></p>
+            <% end %>
+
+            <% if @date.present? %>
+              <% available_slots = @slots.select(&:available).map { |s| [ s.starts_at.strftime("%-I:%M %p"), s.starts_at.iso8601 ] }.uniq { |_, value| value } %>
+              <% if available_slots.empty? %>
+                <p class="text-gray-500 text-sm text-center py-6">Walang available na oras sa araw na ito.</p>
+              <% else %>
+                <div class="grid grid-cols-3 gap-2">
+                  <% available_slots.each do |label, value| %>
+                    <label class="relative flex items-center justify-center border border-gray-200 rounded-lg py-2 text-sm cursor-pointer has-checked:border-emerald-600 has-checked:bg-emerald-50 has-checked:text-emerald-700 transition">
+                      <input type="radio" name="starts_at" value="<%= value %>" class="sr-only" data-action="change->booking-wizard#slotChanged" data-label="<%= label %>">
+                      <%= label %>
+                    </label>
+                  <% end %>
+                </div>
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+
+        <!-- Step 4: Kumpirmahin -->
+        <div data-booking-wizard-target="stepPanel" data-step="4">
+          <p class="text-sm font-medium text-gray-700 mb-3">Suriin bago i-confirm</p>
+          <dl class="flex flex-col gap-3 text-sm bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 mb-4">
+            <div class="flex justify-between gap-3">
+              <dt class="text-gray-500">Serbisyo</dt>
+              <dd class="text-gray-900 font-medium text-right">
+                <%= @service.name %>
+                <% if @service.price.present? %><span class="block text-xs text-gray-500"><%= number_to_currency(@service.price, unit: "₱", precision: 2) %></span><% end %>
+              </dd>
+            </div>
+            <div class="flex justify-between gap-3">
+              <dt class="text-gray-500">Doktor</dt>
+              <dd class="text-gray-900 font-medium text-right" data-booking-wizard-target="summaryStaff">—</dd>
+            </div>
+            <div class="flex justify-between gap-3">
+              <dt class="text-gray-500">Petsa</dt>
+              <dd class="text-gray-900 font-medium text-right" data-booking-wizard-target="summaryDate">—</dd>
+            </div>
+            <div class="flex justify-between gap-3">
+              <dt class="text-gray-500">Oras</dt>
+              <dd class="text-gray-900 font-medium text-right" data-booking-wizard-target="summaryTime">—</dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Nav buttons -->
+        <div class="flex gap-3 mt-2">
+          <button type="button" data-booking-wizard-target="backButton" data-action="click->booking-wizard#back"
+                class="flex-1 border border-gray-300 text-gray-700 font-medium py-2 rounded-lg cursor-pointer hover:bg-gray-50 transition">← Bumalik</button>
+          <button type="button" data-booking-wizard-target="nextButton" data-action="click->booking-wizard#next"
+                class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg cursor-pointer transition disabled:opacity-40 disabled:cursor-not-allowed">Susunod</button>
+          <%= f.submit "I-book", data: { "booking-wizard-target": "submitButton" }, class: "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg cursor-pointer transition hidden" %>
+        </div>
+      <% end %>
+    </div>
   <% end %>
 </div>

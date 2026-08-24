@@ -37,7 +37,7 @@ class BookingsController < ApplicationController
 
   def redirect_to_booking(keep_date: true, **flash)
     redirect_to clinic_booking_path(@clinic, service_id: params[:service_id], month: params[:month],
-      date: keep_date ? params[:date] : nil), **flash
+      date: keep_date ? params[:date] : nil, staff_id: params[:staff_id]), **flash
   end
 
   def set_clinic
@@ -48,6 +48,8 @@ class BookingsController < ApplicationController
     @active_appointment = current_user.patient_appointments.active.order(:starts_at).first
     @services = @clinic.services.order(:name)
     @service = @services.find_by(id: params[:service_id]) || @services.first
+    @staff_members = @clinic.staff_members.order(:name)
+    @staff_id = params[:staff_id].presence
     @month = parse_month(params[:month]) || Date.current.beginning_of_month
     @date = parse_date(params[:date])
     @date = nil unless @date && @date.between?(@month, @month.end_of_month)
