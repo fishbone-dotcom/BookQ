@@ -20,8 +20,28 @@ RSpec.describe "Booking wizard", type: :request do
     expect(response.body).to include('data-step="2"') # doctor step panel
     expect(response.body).to include('name="staff_id"')
     expect(response.body).to include("Dr. Juan Dela Cruz")
+    expect(response.body).to include("Staff")
     expect(response.body).to include("Kahit sino")
+    expect(response.body).to include('data-booking-wizard-target="progressLine"')
     expect(response.body).not_to include("blue-")
+  end
+
+  it "labels the clinic owner distinctly from staff on the doctor step" do
+    owner = create(:user, name: "Dr. Maria Santos")
+    ClinicStaff.create!(clinic: clinic, user: owner, role: :owner)
+
+    get clinic_booking_path(clinic)
+
+    expect(response.body).to include("May-ari ng Clinic")
+  end
+
+  it "shows a Total Amount row on the confirm step when the service has a price" do
+    service.update!(price: 500)
+
+    get clinic_booking_path(clinic)
+
+    expect(response.body).to include("Total Amount")
+    expect(response.body).to include("₱500.00")
   end
 
   it "falls back to email for a staff member without a name" do

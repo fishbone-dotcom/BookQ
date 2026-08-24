@@ -48,7 +48,7 @@ class BookingsController < ApplicationController
     @active_appointment = current_user.patient_appointments.active.order(:starts_at).first
     @services = @clinic.services.order(:name)
     @service = @services.find_by(id: params[:service_id]) || @services.first
-    @staff_members = @clinic.staff_members.order(:name)
+    @clinic_staffs = @clinic.clinic_staffs.includes(:user).joins(:user).order("users.name")
     @staff_id = params[:staff_id].presence
     @month = parse_month(params[:month]) || Date.current.beginning_of_month
     @date = parse_date(params[:date])

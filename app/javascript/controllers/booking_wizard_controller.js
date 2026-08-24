@@ -4,15 +4,14 @@ const CELL_BASE = "relative flex flex-col items-center justify-center h-11 round
 const CELL_SELECTED = "bg-emerald-600 text-white font-semibold"
 
 const CIRCLE_CLASSES = {
-  active: [ "bg-emerald-600", "text-white" ],
-  done: [ "bg-emerald-100", "text-emerald-700" ],
+  reached: [ "bg-emerald-600", "text-white" ],
   upcoming: [ "bg-gray-100", "text-gray-400" ]
 }
 const ALL_CIRCLE_CLASSES = Object.values(CIRCLE_CLASSES).flat()
 
 export default class extends Controller {
   static targets = [
-    "stepPanel", "stepIndicator", "serviceForm", "bookingForm", "hiddenDate", "dateCell",
+    "stepPanel", "stepIndicator", "progressLine", "serviceForm", "bookingForm", "hiddenDate", "dateCell",
     "backButton", "nextButton", "submitButton", "summaryStaff", "summaryDate", "summaryTime"
   ]
   static values = { step: { type: Number, default: 1 } }
@@ -24,11 +23,12 @@ export default class extends Controller {
 
     this.stepIndicatorTargets.forEach((el) => {
       const step = Number(el.dataset.step)
-      const state = step === value ? "active" : step < value ? "done" : "upcoming"
+      const state = step <= value ? "reached" : "upcoming"
       const circle = el.querySelector(".step-circle")
       circle.classList.remove(...ALL_CIRCLE_CLASSES)
       circle.classList.add(...CIRCLE_CLASSES[state])
     })
+    this.progressLineTarget.style.width = `${((value - 1) / 3) * 75}%`
 
     this.backButtonTarget.classList.toggle("hidden", value === 1)
     this.nextButtonTarget.classList.toggle("hidden", value === 4)
