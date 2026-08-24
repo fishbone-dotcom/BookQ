@@ -19,6 +19,7 @@ Rails.application.routes.draw do
     resource :dashboard, only: [ :show ]
     resource :active_clinic, only: [ :update ]
     resources :appointments, only: [ :index ]
+    resource :calendar, only: [ :show ]
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

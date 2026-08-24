@@ -1,0 +1,20 @@
+<%# locals: date:, week_start:, week_days:, path_for: (a lambda taking a Date and returning a path) %>
+<div class="flex items-center justify-between mb-1">
+  <%= link_to path_for.call(week_start - 7.days), class: "text-emerald-600 hover:underline text-sm py-2 px-1 -mx-1" do %>
+    ← <%= (week_start - 7.days).strftime("%b") %>
+  <% end %>
+  <span class="font-semibold text-gray-900"><%= date.strftime("%B %Y") %></span>
+  <%= link_to path_for.call(week_start + 7.days), class: "text-emerald-600 hover:underline text-sm py-2 px-1 -mx-1" do %>
+    <%= (week_start + 7.days).strftime("%b") %> →
+  <% end %>
+</div>
+
+<div class="grid grid-cols-7 gap-1 mb-4">
+  <% week_days.each do |day| %>
+    <%= link_to path_for.call(day),
+          class: "flex flex-col items-center gap-0.5 py-2 rounded-lg text-sm #{day == date ? "bg-emerald-600 text-white font-semibold" : "text-gray-700 hover:bg-gray-100"}" do %>
+      <span class="text-[10px] uppercase <%= day == date ? "text-emerald-100" : "text-gray-400" %>"><%= day.strftime("%a") %></span>
+      <span><%= day.day %></span>
+    <% end %>
+  <% end %>
+</div>
