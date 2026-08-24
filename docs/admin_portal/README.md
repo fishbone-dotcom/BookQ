@@ -20,7 +20,7 @@ Every field these pages need already exists on `Clinic`, `ClinicStaff`, `User`,
 `Service`, or `Appointment`:
 
 - [x] [01 — Dashboard](01_dashboard.md) — `Staff::DashboardsController`, `7e49526`
-- [ ] [02 — Navigation drawer](02_navigation.md)
+- [x] [02 — Navigation drawer](02_navigation.md) — `layouts/staff.html.erb` + `staff/_navigation`
 - [ ] [09 — Appointments list](09_appointments_list.md)
 - [ ] [10 — Add Appointment](10_add_appointment.md)
 - [ ] [12 — Calendar View](12_calendar_view.md)

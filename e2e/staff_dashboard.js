@@ -50,7 +50,7 @@ const path = require("path");
   );
   check("bottom tab bar spans the full width", navBox && viewport && navBox.width >= viewport.width - 5);
 
-  const navItems = await nav.locator("a, span").allInnerTexts();
+  const navItems = await nav.locator("a, span, button").allInnerTexts();
   check("bottom tab bar lists all four sections", [ "Dashboard", "Appointments", "Patients", "More" ].every((label) => navItems.some((t) => t.includes(label))));
 
   check("no browser console/page errors", consoleErrors.length === 0);
