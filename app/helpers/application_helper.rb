@@ -8,4 +8,15 @@ module ApplicationHelper
       user.email.first.upcase
     end
   end
+
+  def time_of_day_greeting
+    hour = Time.current.hour
+    if hour < 12
+      "Good morning"
+    elsif hour < 18
+      "Good afternoon"
+    else
+      "Good evening"
+    end
+  end
 end
