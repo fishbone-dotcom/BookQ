@@ -36,3 +36,8 @@
 
 /app/assets/builds/*
 !/app/assets/builds/.keep
+
+# Playwright e2e checks (see e2e/README.md) — generated output only.
+/e2e/node_modules/
+/e2e/screenshots/*.png
+!/e2e/screenshots/.keep

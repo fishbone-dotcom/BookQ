@@ -1,0 +1,11 @@
+{
+  "name": "bookq-e2e",
+  "private": true,
+  "description": "Playwright smoke checks for BookQ pages, run against a local `bin/rails server` (see e2e/README.md).",
+  "scripts": {
+    "test": "node run_all.js"
+  },
+  "dependencies": {
+    "playwright-core": "^1.62.0"
+  }
+}
