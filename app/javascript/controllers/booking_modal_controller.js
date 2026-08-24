@@ -2,6 +2,11 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["dialog"]
+  static values = { open: Boolean }
+
+  connect() {
+    if (this.openValue) this.open()
+  }
 
   open() {
     this.dialogTarget.showModal()
@@ -9,5 +14,11 @@ export default class extends Controller {
 
   close() {
     this.dialogTarget.close()
+  }
+
+  closeOnBackdrop(event) {
+    if (event.target === this.dialogTarget) {
+      this.close()
+    }
   }
 }

@@ -97,4 +97,62 @@ RSpec.describe Appointment, type: :model do
       expect(same_staff_overlap).not_to be_valid
     end
   end
+
+  describe "one active booking per patient" do
+    it "rejects a new appointment when the patient already has a pending or confirmed one" do
+      patient = create(:user)
+      create(:appointment, patient: patient, clinic: clinic, service: service, status: :pending)
+
+      other_clinic = create(:clinic)
+      other_service = create(:service, clinic: other_clinic)
+      second = build(:appointment, patient: patient, clinic: other_clinic, service: other_service,
+        starts_at: 2.days.from_now.change(hour: 10, min: 0),
+        ends_at: 2.days.from_now.change(hour: 10, min: 30))
+
+      expect(second).not_to be_valid
+      expect(second.errors[:base]).to include("May aktibo ka nang booking. Isang aktibong booking lang ang pinapayagan kada patient.")
+    end
+
+    it "allows a new appointment once the patient's previous one is cancelled" do
+      patient = create(:user)
+      create(:appointment, patient: patient, clinic: clinic, service: service, status: :cancelled)
+
+      second = build(:appointment, patient: patient, clinic: clinic, service: service,
+        starts_at: 2.days.from_now.change(hour: 10, min: 0),
+        ends_at: 2.days.from_now.change(hour: 10, min: 30))
+
+      expect(second).to be_valid
+    end
+  end
+
+  describe "#cancel!" do
+    it "sets an active appointment's status to cancelled" do
+      appointment = create(:appointment, clinic: clinic, service: service, status: :pending)
+      appointment.cancel!
+      expect(appointment.reload.status).to eq("cancelled")
+    end
+
+    it "leaves an already-completed appointment unchanged" do
+      appointment = create(:appointment, clinic: clinic, service: service, status: :completed)
+      appointment.cancel!
+      expect(appointment.reload.status).to eq("completed")
+    end
+
+    it "cancels one of a patient's two pre-existing active appointments without tripping the one-active-booking rule" do
+      patient = create(:user)
+      first = create(:appointment, patient: patient, clinic: clinic, service: service, status: :confirmed,
+        starts_at: 1.day.from_now.change(hour: 10, min: 0), ends_at: 1.day.from_now.change(hour: 10, min: 30))
+      other_clinic = create(:clinic)
+      other_service = create(:service, clinic: other_clinic)
+      # Bypasses validation to simulate pre-existing data that already violates the one-active-booking rule
+      # (e.g. seeded before the rule existed), which is the exact scenario that exposed this bug.
+      build(:appointment, patient: patient, clinic: other_clinic, service: other_service, status: :pending,
+        starts_at: 2.days.from_now.change(hour: 14, min: 0), ends_at: 2.days.from_now.change(hour: 14, min: 15))
+        .save!(validate: false)
+
+      first.cancel!
+
+      expect(first.reload.status).to eq("cancelled")
+    end
+  end
 end

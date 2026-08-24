@@ -20,6 +20,12 @@ patient = User.find_or_create_by!(email: "patient@bookq.test") do |u|
   u.role = :patient
 end
 
+User.find_or_create_by!(email: "admin@bookq.test") do |u|
+  u.password = "password123"
+  u.password_confirmation = "password123"
+  u.role = :admin
+end
+
 clinic = Clinic.find_or_create_by!(name: "Sunrise Family Clinic") do |c|
   c.owner = owner
   c.address = "123 Rizal Street, Quezon City"
@@ -59,4 +65,4 @@ Appointment.find_or_create_by!(patient: patient, clinic: clinic, service: consul
 end
 
 puts "Seeded: #{User.count} users, #{Clinic.count} clinic, #{Service.count} services, #{Appointment.count} appointments"
-puts "Log in as owner@bookq.test / doctor@bookq.test / patient@bookq.test, password: password123"
+puts "Log in as owner@bookq.test / doctor@bookq.test / patient@bookq.test / admin@bookq.test, password: password123"

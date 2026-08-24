@@ -5,6 +5,10 @@
   <% if user_signed_in? %>
     <p class="mb-4 text-gray-700">Logged in as <strong><%= current_user.email %></strong></p>
 
+    <% if current_user.admin? %>
+      <%= link_to "Admin Dashboard", admin_dashboard_path, class: "block w-full text-center bg-gray-800 hover:bg-gray-900 text-white font-medium py-2 rounded-lg mb-4 transition" %>
+    <% end %>
+
     <% if @clinics.present? %>
       <div class="text-left mb-6">
         <p class="text-sm font-medium text-gray-700 mb-2">Mag-book ng appointment:</p>

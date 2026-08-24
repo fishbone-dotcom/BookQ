@@ -6,7 +6,18 @@
   <h1 class="text-2xl font-bold text-gray-900 mb-1"><%= @clinic.name %></h1>
   <p class="text-gray-500 text-sm mb-6"><%= @clinic.address %></p>
 
-  <% if @services.empty? %>
+  <% if @active_appointment %>
+    <div class="bg-blue-50 border border-blue-200 text-blue-700 rounded-lg px-4 py-3 text-sm">
+      <p class="mb-3">
+        May aktibo ka nang booking (<%= @active_appointment.service.name %> sa <%= @active_appointment.clinic.name %>,
+        <%= I18n.l(@active_appointment.starts_at, format: :long) %>). Isang aktibong booking lang ang pinapayagan kada patient —
+        kanselahin muna ito bago mag-book ulit.
+      </p>
+      <%= button_to "Kanselahin ang booking", cancel_appointment_path(@active_appointment), method: :patch,
+            data: { turbo_confirm: "Sigurado ka bang gusto mong kanselahin ang booking na ito? Hindi na ito mababawi." },
+            class: "bg-white border border-blue-300 text-blue-700 font-medium px-4 py-2 rounded-lg text-sm cursor-pointer hover:bg-blue-100 transition" %>
+    </div>
+  <% elsif @services.empty? %>
     <p class="text-gray-500 text-sm">Wala pang service ang clinic na ito.</p>
   <% else %>
     <%= form_with url: clinic_booking_path(@clinic), method: :get, class: "mb-6" do |f| %>
@@ -34,7 +45,7 @@
         <% end %>
       </div>
 
-      <div data-controller="booking-modal">
+      <div data-controller="booking-modal" data-booking-modal-open-value="<%= @date.present? %>">
         <div class="grid grid-cols-7 gap-1 mb-6">
           <% @month.beginning_of_month.wday.times do %>
             <div></div>
@@ -62,7 +73,7 @@
           <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span> Puno / sarado</span>
         </div>
 
-        <dialog data-booking-modal-target="dialog" class="rounded-xl p-0 backdrop:bg-black/40 w-11/12 max-w-sm">
+        <dialog data-booking-modal-target="dialog" data-action="click->booking-modal#closeOnBackdrop" class="m-auto rounded-xl p-0 backdrop:bg-black/40 w-11/12 max-w-sm">
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
               <h2 class="text-lg font-bold text-gray-900"><%= @date&.strftime("%A, %B %-d") || "Available na oras" %></h2>
@@ -70,11 +81,8 @@
             </div>
 
             <%= turbo_frame_tag "slots" do %>
-              <% if @alert.present? %>
-                <p class="bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2 text-sm mb-3"><%= @alert %></p>
-              <% end %>
-              <% if @notice.present? %>
-                <p class="bg-green-50 border border-green-200 text-green-700 rounded-lg px-3 py-2 text-sm mb-3"><%= @notice %></p>
+              <% if flash[:alert].present? %>
+                <p class="bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2 text-sm mb-3"><%= flash[:alert] %></p>
               <% end %>
 
               <% if @date.present? %>
@@ -82,12 +90,12 @@
                 <% if available_slots.empty? %>
                   <p class="text-gray-500 text-sm text-center py-6">Walang available na oras sa araw na ito.</p>
                 <% else %>
-                  <%= form_with url: clinic_booking_path(@clinic), method: :post, class: "flex flex-col gap-3" do |f| %>
+                  <%= form_with url: clinic_booking_path(@clinic), method: :post, data: { turbo_frame: "_top" }, class: "flex flex-col gap-3" do |f| %>
                     <%= f.select :starts_at, available_slots, {}, class: "w-full rounded-lg border border-gray-300 px-3 py-2" %>
                     <%= f.hidden_field :service_id, value: @service.id %>
                     <%= f.hidden_field :date, value: @date.iso8601 %>
                     <%= f.hidden_field :month, value: @month.strftime("%Y-%m") %>
-                    <%= f.submit "I-book", class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg cursor-pointer transition" %>
+                    <%= f.submit "I-book", data: { turbo_confirm: "Hindi na mapapalitan ang booking na ito kapag na-confirm. Sigurado ka ba?" }, class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg cursor-pointer transition" %>
                   <% end %>
                 <% end %>
               <% end %>
