@@ -41,3 +41,4 @@
 /e2e/node_modules/
 /e2e/screenshots/*.png
 !/e2e/screenshots/.keep
+/e2e/videos/

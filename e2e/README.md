@@ -39,6 +39,12 @@ Env vars:
 - `BASE_URL` — defaults to `http://localhost:3000`
 - `CHROMIUM_PATH` — defaults to `/usr/bin/chromium`; unset/override on a
   machine using Playwright's own downloaded browser instead
+- `RECORD_VIDEO=1` — also records the run to `e2e/videos/<script-name>.webm`
+  (gitignored, same as screenshots — a debugging/demo aid, not committed).
+  Adds short pauses between steps so the video is actually watchable instead
+  of a blur of instant actions. Convert to mp4 for wider playback support:
+  `ffmpeg -i e2e/videos/staff_dashboard.webm -c:v libx264 -pix_fmt yuv420p
+  -movflags +faststart e2e/videos/staff_dashboard.mp4`
 
 ## Adding a check for a new page
 

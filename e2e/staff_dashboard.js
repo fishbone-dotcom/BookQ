@@ -1,27 +1,33 @@
 // Playwright smoke check for docs/admin_portal/01_dashboard.md.
 // Usage: node e2e/staff_dashboard.js  (see e2e/README.md for setup)
-const { launch, signIn } = require("./lib/browser");
+const { launch, closeAndSaveVideo, signIn } = require("./lib/browser");
 const { check, summarize } = require("./lib/check");
 const path = require("path");
 
 (async () => {
-  const { browser, page, consoleErrors, baseUrl } = await launch();
+  const { browser, context, page, consoleErrors, baseUrl, recordingVideo } = await launch();
+  const pause = () => page.waitForTimeout(recordingVideo ? 700 : 0);
 
   // 1. Unauthenticated visitors are sent to sign in.
   await page.goto(`${baseUrl}/staff/dashboard`);
   await page.waitForLoadState("networkidle");
   check("unauthenticated visit redirects to sign in", page.url().includes("/users/sign_in"));
+  await pause();
 
   // 2. A patient (not clinic staff) is bounced back to the home page.
   await signIn(page, baseUrl, "patient@bookq.test", "password123");
+  await pause();
   await page.goto(`${baseUrl}/staff/dashboard`);
   await page.waitForLoadState("networkidle");
   check("patient-role user is redirected away from the staff dashboard", page.url() === `${baseUrl}/`);
+  await pause();
   await page.click('button:has-text("Log out")');
   await page.waitForLoadState("networkidle");
+  await pause();
 
   // 3. A clinic staffer sees their dashboard.
   await signIn(page, baseUrl, "owner@bookq.test", "password123");
+  await pause();
   await page.goto(`${baseUrl}/staff/dashboard`);
   await page.waitForLoadState("networkidle");
   await page.waitForTimeout(300);
@@ -56,7 +62,9 @@ const path = require("path");
   const screenshotPath = path.join(__dirname, "screenshots", "staff_dashboard.png");
   await page.screenshot({ path: screenshotPath, fullPage: true });
   console.log(`  screenshot saved to ${screenshotPath}`);
+  await pause();
 
-  await browser.close();
+  const videoPath = await closeAndSaveVideo(browser, context, "staff_dashboard");
+  if (videoPath) console.log(`  video saved to ${videoPath}`);
   summarize("staff_dashboard.js");
 })();
