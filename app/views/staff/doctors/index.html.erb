@@ -1,0 +1,37 @@
+<% content_for(:page_title, "Doctors") %>
+
+<div data-controller="staff-doctor-search">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="relative flex-1">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" placeholder="Search doctors..." autocomplete="off"
+        data-staff-doctor-search-target="input" data-action="input->staff-doctor-search#filter"
+        class="w-full bg-white border border-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+    </div>
+    <span class="w-9 h-9 rounded-full bg-gray-100 text-gray-300 flex items-center justify-center shrink-0" title="Add Doctor — coming soon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    </span>
+  </div>
+
+  <% if @clinic_staffs.empty? %>
+    <p class="text-sm text-gray-500 text-center py-6">No doctors on staff yet.</p>
+  <% else %>
+    <div class="flex flex-col gap-2">
+      <% @clinic_staffs.each do |clinic_staff| %>
+        <% staff = clinic_staff.user %>
+        <div class="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm"
+             data-staff-doctor-search-target="item" data-doctor-search-name="<%= staff.display_name.downcase %>">
+          <span class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm font-semibold flex-none"><%= initials_for(staff) %></span>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-semibold text-gray-900 truncate"><%= staff.display_name %></p>
+            <p class="text-xs text-gray-500 truncate"><%= clinic_staff.specialization.presence || (clinic_staff.owner? ? "Clinic Owner" : "Staff") %></p>
+          </div>
+          <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-medium shrink-0 <%= clinic_staff.available? ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700" %>">
+            <%= clinic_staff.available? ? "Available" : "On Leave" %>
+          </span>
+        </div>
+      <% end %>
+      <p data-staff-doctor-search-target="empty" class="hidden text-center text-sm text-gray-400 py-4">No doctors found.</p>
+    </div>
+  <% end %>
+</div>

@@ -104,3 +104,11 @@ View — all in `docs/admin_portal/README.md`, all built this way).
   action succeeded, because Devise doesn't respond to the `turbo_stream`
   format Turbo requests. Use `data: { turbo: false }` on session-ending
   buttons.
+- **After running a migration that adds a column an existing model's `enum`
+  depends on, restart the Rails server.** The already-running dev process can
+  keep a stale schema/column cache and start raising `Undeclared attribute
+  type for enum '...'` on literally every request touching that model
+  (including sign-in, if it touches the association anywhere) until
+  restarted. `kill <puma-pid>` then `bin/rails server -b 0.0.0.0 -p 3000 &
+  disown` (backgrounding directly, not through a `nohup (...) &` subshell,
+  which has not reliably started the process in this sandbox).

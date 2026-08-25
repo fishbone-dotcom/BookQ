@@ -27,8 +27,8 @@ Every field these pages need already exists on `Clinic`, `ClinicStaff`, `User`,
 
 ## Phase 2 — small migrations (new columns on existing models, no new tables)
 
-- [ ] [03 — Doctors list](03_doctors_list.md) — needs specialization/status/phone on
-  `ClinicStaff` (or `User`)
+- [x] [03 — Doctors list](03_doctors_list.md) — `Staff::DoctorsController#index`,
+  specialization/status/phone added to `ClinicStaff`
 - [ ] [04 — Add Doctor](04_add_doctor.md) — same, plus a photo upload
 - [ ] [05 — Patients list](05_patients_list.md) — needs birthdate/phone on `User`
 - [ ] [06 — Patient Profile](06_patient_profile.md) — needs address, blood type,
