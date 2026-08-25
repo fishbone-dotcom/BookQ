@@ -1,0 +1,107 @@
+<% content_for(:page_title, "Patient Profile") %>
+
+<div class="flex items-center justify-between -mt-1">
+  <%= link_to staff_patients_path, class: "inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700" do %>
+    ← Back
+  <% end %>
+  <%= link_to edit_staff_patient_path(@patient), class: "text-gray-400 hover:text-gray-600" do %>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+  <% end %>
+</div>
+
+<div class="flex items-center gap-3 bg-white border border-gray-200 rounded-xl p-4 shadow-sm mt-4">
+  <span class="w-14 h-14 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center text-lg font-semibold flex-none"><%= initials_for(@patient) %></span>
+  <div class="min-w-0 flex-1">
+    <p class="text-base font-semibold text-gray-900 truncate"><%= @patient.display_name %></p>
+    <p class="text-sm text-gray-500 truncate">
+      <% details = [ (@profile&.age ? "#{@profile.age} years old" : nil), @profile&.sex.presence ].compact %>
+      <%= details.any? ? details.join(" • ") : "No details on file" %>
+    </p>
+  </div>
+  <p class="text-sm text-gray-500 shrink-0"><%= @profile&.phone.presence || "—" %></p>
+</div>
+
+<div class="flex gap-2 overflow-x-auto mt-4 mb-4">
+  <% Staff::PatientsController::TABS.each do |tab| %>
+    <%= link_to tab.capitalize, staff_patient_path(@patient, tab: tab),
+          class: "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap #{@tab == tab ? "bg-emerald-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}" %>
+  <% end %>
+</div>
+
+<% case @tab
+   when "overview" %>
+  <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col gap-3">
+    <h2 class="text-sm font-semibold text-gray-900">Personal Information</h2>
+
+    <div class="flex justify-between gap-3 text-sm">
+      <span class="text-gray-500">Email</span>
+      <span class="text-gray-900 text-right truncate"><%= @patient.email %></span>
+    </div>
+    <div class="flex justify-between gap-3 text-sm">
+      <span class="text-gray-500">Address</span>
+      <span class="text-gray-900 text-right truncate"><%= @profile&.address.presence || "Not set" %></span>
+    </div>
+    <div class="flex justify-between gap-3 text-sm">
+      <span class="text-gray-500">Blood Type</span>
+      <span class="text-gray-900 text-right"><%= @profile&.blood_type.presence || "Not set" %></span>
+    </div>
+    <div class="flex justify-between gap-3 text-sm">
+      <span class="text-gray-500">Allergies</span>
+      <span class="text-gray-900 text-right truncate"><%= @profile&.allergies.presence || "None recorded" %></span>
+    </div>
+
+    <div class="border-t border-gray-100 pt-3 mt-1">
+      <h3 class="text-xs font-medium text-gray-500 uppercase mb-2">Emergency Contact</h3>
+      <% if @profile&.emergency_contact_name.blank? %>
+        <p class="text-sm text-gray-500">No emergency contact on file.</p>
+      <% else %>
+        <div class="flex justify-between gap-3 text-sm mb-1">
+          <span class="text-gray-500">Name</span>
+          <span class="text-gray-900 text-right truncate"><%= @profile.emergency_contact_name %></span>
+        </div>
+        <div class="flex justify-between gap-3 text-sm mb-1">
+          <span class="text-gray-500">Relationship</span>
+          <span class="text-gray-900 text-right truncate"><%= @profile.emergency_contact_relationship.presence || "Not set" %></span>
+        </div>
+        <div class="flex justify-between gap-3 text-sm">
+          <span class="text-gray-500">Phone</span>
+          <span class="text-gray-900 text-right truncate"><%= @profile.emergency_contact_phone.presence || "Not set" %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+<% when "appointments" %>
+  <% if @appointments.empty? %>
+    <div class="bg-white border border-gray-200 rounded-xl p-4 text-center text-sm text-gray-500 shadow-sm">
+      No appointments at this clinic yet.
+    </div>
+  <% else %>
+    <div class="flex flex-col gap-2">
+      <% @appointments.each do |appointment| %>
+        <%= link_to edit_staff_appointment_path(appointment), class: "bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm hover:border-emerald-300 transition" do %>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-semibold text-gray-900 truncate"><%= appointment.service.name %></p>
+            <p class="text-xs text-gray-500 truncate">
+              <%= I18n.l(appointment.starts_at, format: :long) %>
+              <% if appointment.staff %> &middot; <%= appointment.staff.display_name %><% end %>
+            </p>
+          </div>
+          <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-medium shrink-0 <%=
+            case appointment.status
+            when "pending" then "bg-yellow-50 text-yellow-700"
+            when "confirmed" then "bg-green-50 text-green-700"
+            when "cancelled" then "bg-red-50 text-red-700"
+            else "bg-gray-100 text-gray-600"
+            end
+          %>"><%= appointment.status %></span>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+
+<% else %>
+  <div class="bg-white border border-gray-200 rounded-xl p-6 text-center text-sm text-gray-400 shadow-sm">
+    <%= @tab.capitalize %> — coming soon.
+  </div>
+<% end %>

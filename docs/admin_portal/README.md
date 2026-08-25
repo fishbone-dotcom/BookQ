@@ -32,8 +32,10 @@ Every field these pages need already exists on `Clinic`, `ClinicStaff`, `User`,
 - [x] [04 — Add Doctor](04_add_doctor.md) — `Staff::DoctorsController#new/#create`,
   find-or-create by email, owner-only, photo deferred (initials avatar)
 - [x] [05 — Patients list](05_patients_list.md) — `Staff::PatientsController#index`, new `PatientProfile` model (`has_one` off `User`, mirrors the `ClinicStaff` precedent from page 03)
-- [ ] [06 — Patient Profile](06_patient_profile.md) — needs address, blood type,
-  allergies, emergency contact on `User`
+- [x] [06 — Patient Profile](06_patient_profile.md) — `Staff::PatientsController#show/#edit/#update`,
+      tabs (Overview/Appointments built; Records/Files "coming soon" until
+      [07](07_patient_records.md) exists). Overview edits go through
+      `PatientProfile`, not `User`, so `role` etc. can never be touched.
 - [x] [11 — Appointment Details](11_appointment_details.md) — simplified per user
       request: selecting an appointment (list row or calendar block) goes
       straight to `Staff::AppointmentsController#edit`, an edit-and-save form

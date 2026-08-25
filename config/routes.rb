@@ -25,7 +25,7 @@ Rails.application.routes.draw do
     end
     resource :calendar, only: [ :show ]
     resources :doctors, only: [ :index, :new, :create ]
-    resources :patients, only: [ :index ]
+    resources :patients, only: [ :index, :show, :edit, :update ]
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
