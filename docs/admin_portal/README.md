@@ -31,7 +31,7 @@ Every field these pages need already exists on `Clinic`, `ClinicStaff`, `User`,
   specialization/status/phone added to `ClinicStaff`
 - [x] [04 — Add Doctor](04_add_doctor.md) — `Staff::DoctorsController#new/#create`,
   find-or-create by email, owner-only, photo deferred (initials avatar)
-- [x] [05 — Patients list](05_patients_list.md) — `Staff::PatientsController#index`, new `PatientProfile` model (`has_one` off `User`, mirrors the `ClinicStaff` precedent from page 03)
+- [x] [05 — Patients list](05_patients_list.md) — `Staff::PatientsController#index`, new `PatientProfile` model (`has_one` off `User`, mirrors the `ClinicStaff` precedent from page 03). Scoped per-doctor, not just per-clinic, per user request (DPA data minimization): a plain staff/doctor only sees patients booked with *them* specifically; the clinic owner still sees every patient at the clinic.
 - [x] [06 — Patient Profile](06_patient_profile.md) — `Staff::PatientsController#show/#edit/#update`,
       tabs (Overview/Appointments built; Records/Files "coming soon" until
       [07](07_patient_records.md) exists). Overview edits go through

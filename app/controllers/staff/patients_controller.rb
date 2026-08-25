@@ -10,7 +10,12 @@ module Staff
       @patient = patient_scope.find(params[:id])
       @profile = @patient.patient_profile
       @tab = TABS.include?(params[:tab]) ? params[:tab] : "overview"
-      @appointments = @clinic.appointments.where(patient: @patient).includes(:service, :staff).order(starts_at: :desc) if @tab == "appointments"
+
+      if @tab == "appointments"
+        scope = @clinic.appointments.where(patient: @patient)
+        scope = scope.where(staff: current_user) unless @clinic_staff&.owner?
+        @appointments = scope.includes(:service, :staff).order(starts_at: :desc)
+      end
     end
 
     def edit
@@ -31,8 +36,13 @@ module Staff
 
     private
 
+    # Owners see every patient who's booked at the clinic; plain staff (doctors)
+    # only see patients who have an appointment with them specifically —
+    # a doctor has no business seeing another doctor's patients' records.
     def patient_scope
-      User.joins(:patient_appointments).where(appointments: { clinic_id: @clinic.id }).distinct
+      scope = User.joins(:patient_appointments).where(appointments: { clinic_id: @clinic.id })
+      scope = scope.where(appointments: { staff_id: current_user.id }) unless @clinic_staff&.owner?
+      scope.distinct
     end
 
     def profile_params
