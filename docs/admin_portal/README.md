@@ -64,7 +64,9 @@ these as separate feature proposals to size individually before starting:
   skipped for now; confirm with client before building given clinical-data
   privacy/compliance weight)
 - [ ] [08 — Add Medical Record](08_add_medical_record.md) (blocked on 07)
-- [ ] [14 — Inventory](14_inventory.md) (new subsystem, unrelated to appointments)
+- [ ] [14 — Inventory](14_inventory.md) (new subsystem, unrelated to appointments —
+  skipped for now per user decision; it's the single largest net-new
+  subsystem in the whole mockup, confirm scope before starting)
 - [ ] [15 — Billing & Payments](15_billing_payments.md) (new subsystem)
 - [ ] [16 — Settings](16_settings.md) (mixed — some rows map to real features like
   Working Hours/`Availability`, others like Backup & Restore don't exist anywhere
