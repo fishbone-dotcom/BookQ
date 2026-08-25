@@ -39,7 +39,9 @@ const path = require("path");
   check("Back link returns to the actual previous page (Settings), not a fixed home page", page.url() === `${baseUrl}/staff/settings`);
   await pause();
 
-  // Change Password lives on its own page, reached from Settings directly.
+  // Change Password reached directly from Settings (not via Profile) — this
+  // is the exact path the user hit a bug on: Back was hardcoded to Profile
+  // instead of wherever you actually came from.
   await page.click('a[href="/users/change_password"]');
   await page.waitForURL(`${baseUrl}/users/change_password`, { timeout: 10000 });
   await pause();
@@ -52,10 +54,23 @@ const path = require("path");
   check("still requires current password to confirm the change", await page.locator('input[name="user[current_password]"]').count() === 1);
 
   await page.click("text=← Back");
+  await page.waitForURL(`${baseUrl}/staff/settings`, { timeout: 10000 });
+  check("Back returns to Settings when reached directly from Settings (not hardcoded to Profile)", page.url() === `${baseUrl}/staff/settings`);
+  await pause();
+
+  // Now reach Change Password via the link on the Profile page instead —
+  // Back should follow the actual referer there too (Profile, not Settings).
+  await page.click('a[href="/users/edit"]');
   await page.waitForURL(`${baseUrl}/users/edit`, { timeout: 10000 });
-  check("Change Password's Back link returns to Profile", page.url() === `${baseUrl}/users/edit`);
   await pause();
   check("Cancel my account is styled as a danger button, not a plain link", await page.locator('button:has-text("Cancel my account")').count() === 1);
+
+  await page.click('a[href="/users/change_password"]');
+  await page.waitForURL(`${baseUrl}/users/change_password`, { timeout: 10000 });
+  await pause();
+  await page.click("text=← Back");
+  await page.waitForURL(`${baseUrl}/users/edit`, { timeout: 10000 });
+  check("Back returns to Profile when reached from Profile's own Change Password link", page.url() === `${baseUrl}/users/edit`);
 
   check("no browser console/page errors", consoleErrors.length === 0);
   if (consoleErrors.length > 0) console.log("  console errors:", consoleErrors);
