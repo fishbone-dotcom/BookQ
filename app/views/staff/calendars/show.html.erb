@@ -15,36 +15,47 @@
     end_minutes = @availability.end_time.hour * 60 + @availability.end_time.min
     total_minutes = end_minutes - start_minutes
     px_per_min = 1.2
+    grid_height = total_minutes * px_per_min
     hour_marks = ((start_minutes.to_f / 60).ceil..(end_minutes.to_f / 60).floor)
   %>
 
-  <div class="relative border border-gray-200 rounded-xl bg-white" style="height: <%= total_minutes * px_per_min %>px;">
-    <% hour_marks.each do |hour| %>
-      <div class="absolute left-0 right-0 border-t border-gray-100" style="top: <%= (hour * 60 - start_minutes) * px_per_min %>px;">
-        <span class="absolute -top-2 left-1.5 text-[10px] text-gray-400 bg-white px-0.5"><%= Time.zone.parse("#{hour}:00").strftime("%-I %p") %></span>
-      </div>
-    <% end %>
-
-    <div class="absolute inset-0 pl-12 pr-1">
-      <% @placements.each do |placement| %>
-        <% appointment = placement.appointment
-           start_offset = ((appointment.starts_at.hour * 60 + appointment.starts_at.min) - start_minutes) * px_per_min
-           duration_min = (appointment.ends_at - appointment.starts_at) / 60.0
-           block_height = [ duration_min * px_per_min, 22 ].max
-           width_pct = 100.0 / placement.columns
-           left_pct = placement.column * width_pct
-           color_class = case appointment.status
-             when "pending" then "bg-yellow-100 border-yellow-300 text-yellow-800"
-             when "confirmed" then "bg-emerald-100 border-emerald-400 text-emerald-800"
-             else "bg-gray-100 border-gray-300 text-gray-700"
-             end %>
-        <div class="absolute rounded-md border px-1.5 py-0.5 overflow-hidden flex items-center <%= color_class %>"
-             style="top: <%= start_offset %>px; height: <%= block_height %>px; left: <%= left_pct %>%; width: calc(<%= width_pct %>% - 4px);">
-          <p class="text-[9px] font-semibold truncate leading-tight">
-            <%= appointment.patient.display_name %> | <%= appointment.service.name %>
-          </p>
-        </div>
+  <div class="flex border border-gray-200 rounded-xl bg-white overflow-hidden">
+    <!-- Time column -->
+    <div class="w-12 shrink-0 border-r border-gray-100 relative" style="height: <%= grid_height %>px;">
+      <% hour_marks.each do |hour| %>
+        <span class="absolute inset-x-0 text-center text-[10px] text-gray-400 pt-0.5" style="top: <%= (hour * 60 - start_minutes) * px_per_min %>px;">
+          <%= Time.zone.parse("#{hour}:00").strftime("%-I %p") %>
+        </span>
       <% end %>
+    </div>
+
+    <!-- Appointments column -->
+    <div class="flex-1 relative" style="height: <%= grid_height %>px;">
+      <% hour_marks.each do |hour| %>
+        <div class="absolute inset-x-0 border-t border-gray-100" style="top: <%= (hour * 60 - start_minutes) * px_per_min %>px;"></div>
+      <% end %>
+
+      <div class="absolute inset-y-0 inset-x-1">
+        <% @placements.each do |placement| %>
+          <% appointment = placement.appointment
+             start_offset = ((appointment.starts_at.hour * 60 + appointment.starts_at.min) - start_minutes) * px_per_min
+             duration_min = (appointment.ends_at - appointment.starts_at) / 60.0
+             block_height = [ duration_min * px_per_min, 22 ].max
+             width_pct = 100.0 / placement.columns
+             left_pct = placement.column * width_pct
+             color_class = case appointment.status
+               when "pending" then "bg-yellow-100 border-yellow-300 text-yellow-800"
+               when "confirmed" then "bg-emerald-100 border-emerald-400 text-emerald-800"
+               else "bg-gray-100 border-gray-300 text-gray-700"
+               end %>
+          <div class="absolute rounded-md border px-1.5 py-0.5 overflow-hidden flex items-center <%= color_class %>"
+               style="top: <%= start_offset %>px; height: <%= block_height %>px; left: <%= left_pct %>%; width: calc(<%= width_pct %>% - 4px);">
+            <p class="text-[9px] font-semibold truncate leading-tight">
+              <%= appointment.patient.display_name %> | <%= appointment.service.name %>
+            </p>
+          </div>
+        <% end %>
+      </div>
     </div>
   </div>
 <% end %>
