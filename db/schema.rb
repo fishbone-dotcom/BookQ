@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_25_044127) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_25_052357) do
   create_table "appointments", force: :cascade do |t|
     t.integer "clinic_id", null: false
     t.datetime "created_at", null: false
@@ -63,6 +63,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_25_044127) do
     t.index ["owner_id"], name: "index_clinics_on_owner_id"
   end
 
+  create_table "patient_profiles", force: :cascade do |t|
+    t.string "address"
+    t.text "allergies"
+    t.date "birthdate"
+    t.string "blood_type"
+    t.datetime "created_at", null: false
+    t.string "emergency_contact_name"
+    t.string "emergency_contact_phone"
+    t.string "emergency_contact_relationship"
+    t.string "phone"
+    t.string "sex"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_patient_profiles_on_user_id", unique: true
+  end
+
   create_table "services", force: :cascade do |t|
     t.integer "clinic_id", null: false
     t.datetime "created_at", null: false
@@ -95,5 +111,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_25_044127) do
   add_foreign_key "clinic_staffs", "clinics"
   add_foreign_key "clinic_staffs", "users"
   add_foreign_key "clinics", "users", column: "owner_id"
+  add_foreign_key "patient_profiles", "users"
   add_foreign_key "services", "clinics"
 end

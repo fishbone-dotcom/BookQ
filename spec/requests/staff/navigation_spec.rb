@@ -37,7 +37,7 @@ RSpec.describe "Staff navigation drawer", type: :request do
     get staff_dashboard_path
 
     expect(response.body).to include("Inventory")
-    expect(response.body.scan("Soon").count).to eq(7) # one per not-yet-built nav item (Dashboard, Appointments, Doctors are real links)
+    expect(response.body.scan("Soon").count).to eq(6) # one per not-yet-built nav item (Dashboard, Appointments, Doctors, Patients are real links)
   end
 
   describe "PATCH /staff/active_clinic" do

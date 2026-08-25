@@ -67,5 +67,19 @@ Appointment.find_or_create_by!(patient: patient, clinic: clinic, service: consul
   appt.status = :pending
 end
 
+patient.update!(name: "Juana Dela Cruz")
+
+PatientProfile.find_or_create_by!(user: patient) do |profile|
+  profile.birthdate = Date.new(1996, 3, 14)
+  profile.sex = "Female"
+  profile.phone = "0917-555-1234"
+  profile.address = "45 Mabini Street, Quezon City"
+  profile.blood_type = "O+"
+  profile.allergies = "None"
+  profile.emergency_contact_name = "Pedro Dela Cruz"
+  profile.emergency_contact_relationship = "Father"
+  profile.emergency_contact_phone = "0917-555-5678"
+end
+
 puts "Seeded: #{User.count} users, #{Clinic.count} clinic, #{Service.count} services, #{Appointment.count} appointments"
 puts "Log in as owner@bookq.test / doctor@bookq.test / patient@bookq.test / admin@bookq.test, password: password123"

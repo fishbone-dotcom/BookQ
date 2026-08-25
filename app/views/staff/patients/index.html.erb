@@ -1,0 +1,37 @@
+<% content_for(:page_title, "Patients") %>
+
+<div data-controller="staff-patient-list-search">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="relative flex-1">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" placeholder="Search patients..." autocomplete="off"
+        data-staff-patient-list-search-target="input" data-action="input->staff-patient-list-search#filter"
+        class="w-full bg-white border border-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+    </div>
+    <span class="w-9 h-9 rounded-full bg-gray-100 text-gray-300 flex items-center justify-center shrink-0" title="Add Patient — coming soon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    </span>
+  </div>
+
+  <% if @patients.empty? %>
+    <p class="text-sm text-gray-500 text-center py-6">No patients have booked at this clinic yet.</p>
+  <% else %>
+    <div class="flex flex-col gap-2">
+      <% @patients.each do |patient| %>
+        <% profile = patient.patient_profile
+           details = [ (profile&.age ? "#{profile.age} years old" : nil), profile&.sex.presence ].compact
+           search_name = [ patient.display_name, profile&.phone ].compact.join(" ").downcase %>
+        <div class="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm"
+             data-staff-patient-list-search-target="item" data-patient-list-search-name="<%= search_name %>">
+          <span class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm font-semibold flex-none"><%= initials_for(patient) %></span>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-semibold text-gray-900 truncate"><%= patient.display_name %></p>
+            <p class="text-xs text-gray-500 truncate"><%= details.any? ? details.join(" • ") : "No details yet" %></p>
+          </div>
+          <span class="text-xs text-gray-500 shrink-0"><%= profile&.phone.presence || "—" %></span>
+        </div>
+      <% end %>
+      <p data-staff-patient-list-search-target="empty" class="hidden text-center text-sm text-gray-400 py-4">No patients found.</p>
+    </div>
+  <% end %>
+</div>

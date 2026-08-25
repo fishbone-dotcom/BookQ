@@ -31,7 +31,7 @@ Every field these pages need already exists on `Clinic`, `ClinicStaff`, `User`,
   specialization/status/phone added to `ClinicStaff`
 - [x] [04 — Add Doctor](04_add_doctor.md) — `Staff::DoctorsController#new/#create`,
   find-or-create by email, owner-only, photo deferred (initials avatar)
-- [ ] [05 — Patients list](05_patients_list.md) — needs birthdate/phone on `User`
+- [x] [05 — Patients list](05_patients_list.md) — `Staff::PatientsController#index`, new `PatientProfile` model (`has_one` off `User`, mirrors the `ClinicStaff` precedent from page 03)
 - [ ] [06 — Patient Profile](06_patient_profile.md) — needs address, blood type,
   allergies, emergency contact on `User`
 - [ ] [11 — Appointment Details](11_appointment_details.md) — mostly Phase 1, but the
