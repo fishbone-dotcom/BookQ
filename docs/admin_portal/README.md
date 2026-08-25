@@ -29,7 +29,8 @@ Every field these pages need already exists on `Clinic`, `ClinicStaff`, `User`,
 
 - [x] [03 — Doctors list](03_doctors_list.md) — `Staff::DoctorsController#index`,
   specialization/status/phone added to `ClinicStaff`
-- [ ] [04 — Add Doctor](04_add_doctor.md) — same, plus a photo upload
+- [x] [04 — Add Doctor](04_add_doctor.md) — `Staff::DoctorsController#new/#create`,
+  find-or-create by email, owner-only, photo deferred (initials avatar)
 - [ ] [05 — Patients list](05_patients_list.md) — needs birthdate/phone on `User`
 - [ ] [06 — Patient Profile](06_patient_profile.md) — needs address, blood type,
   allergies, emergency contact on `User`

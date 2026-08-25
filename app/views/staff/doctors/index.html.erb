@@ -8,9 +8,15 @@
         data-staff-doctor-search-target="input" data-action="input->staff-doctor-search#filter"
         class="w-full bg-white border border-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
     </div>
-    <span class="w-9 h-9 rounded-full bg-gray-100 text-gray-300 flex items-center justify-center shrink-0" title="Add Doctor — coming soon">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-    </span>
+    <% if @clinic_staff&.owner? %>
+      <%= link_to new_staff_doctor_path, class: "w-9 h-9 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shrink-0 transition" do %>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      <% end %>
+    <% else %>
+      <span class="w-9 h-9 rounded-full bg-gray-100 text-gray-300 flex items-center justify-center shrink-0" title="Only clinic owners can add doctors">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      </span>
+    <% end %>
   </div>
 
   <% if @clinic_staffs.empty? %>

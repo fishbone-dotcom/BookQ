@@ -14,8 +14,7 @@ const path = require("path");
   await page.locator('button[data-action="staff-nav#open"]').first().click();
   await page.waitForTimeout(300);
   await page.click('aside a:has-text("Doctors")');
-  await page.waitForLoadState("networkidle");
-  await page.waitForTimeout(300);
+  await page.waitForURL(`${baseUrl}/staff/doctors`, { timeout: 10000 });
   await pause();
 
   check("Doctors page loads at the right URL", page.url() === `${baseUrl}/staff/doctors`);
@@ -34,7 +33,7 @@ const path = require("path");
   await page.waitForTimeout(150);
   await pause();
 
-  check("Add Doctor button is present but inert (page 04 not built yet)", await page.locator('span[title*="coming soon"]').count() > 0);
+  check("Add Doctor button links to the new-doctor form (owner)", await page.locator('a[href="/staff/doctors/new"]').count() > 0);
 
   check("no browser console/page errors", consoleErrors.length === 0);
   if (consoleErrors.length > 0) console.log("  console errors:", consoleErrors);

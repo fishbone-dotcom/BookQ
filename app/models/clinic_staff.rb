@@ -5,5 +5,5 @@ class ClinicStaff < ApplicationRecord
   enum :role, { staff: 0, owner: 1 }
   enum :status, { available: 0, on_leave: 1 }
 
-  validates :user_id, uniqueness: { scope: :clinic_id }
+  validates :user_id, uniqueness: { scope: :clinic_id, message: "already staffs this clinic" }
 end

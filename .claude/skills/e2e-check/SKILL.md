@@ -41,6 +41,19 @@ hasn't autoloaded yet in this dev process can be slow enough to fail an
 assertion on a tight timeout. If a script fails on its first run after adding
 a new page, re-run it once before concluding there's a real bug.
 
+**Prefer `page.waitForURL(url, { timeout })` over `waitForLoadState("networkidle")
++ waitForTimeout(N)` after any click that navigates.** The fixed-timeout combo
+looks fine locally but is genuinely flaky here — request duration varies
+enough (e.g. creating a `User` bcrypt-hashes a password, which alone pushed
+one request past 400ms) that no single fixed sleep is both fast and reliable.
+`waitForURL` polls until the URL actually matches instead of guessing a
+duration, and needs no larger timeout budget than a generous one (10s is
+plenty — it resolves as soon as the URL matches, it doesn't wait the full
+budget on success). Same idea for content: prefer `locator(...).waitFor()`
+over reading `innerText()` immediately after a wait. If two elements can
+match the same text (e.g. a flash notice echoing the exact string a list row
+also shows), scope the locator or add `.first()`.
+
 ## Running a check
 
 ```bash
@@ -67,7 +80,14 @@ naturally idempotent, either:
   `e2e.patient@bookq.test`, see `staff_add_appointment.js`) so it never
   collides with real demo data the user is looking at, and
 - **clean up at the end of the script** (cancel the booking it created) so
-  the script is safely re-runnable without manual DB resets between runs.
+  the script is safely re-runnable without manual DB resets between runs —
+  and wrap the whole flow in `try { ... } finally { cleanup() }` so a crash
+  partway through (an assertion timeout, a locator that never resolves)
+  still runs cleanup instead of leaving an orphaned test record behind. This
+  has actually happened (`staff_add_doctor.js` left a stray doctor after a
+  strict-mode locator error before it had a `finally`) — check for and remove
+  any leftover `e2e-*@example.com` / similarly-named fixture data before
+  trusting a screenshot's data looks like real demo content.
 
 A Turbo-intercepted click that should navigate but the page state doesn't
 visibly update (e.g. logging out) can mean the target action doesn't handle
