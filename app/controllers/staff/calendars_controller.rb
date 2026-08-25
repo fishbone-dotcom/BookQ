@@ -8,7 +8,7 @@ module Staff
       @availability = @clinic.availabilities.find_by(day_of_week: @date.wday)
       return unless @availability
 
-      appointments = @clinic.appointments.includes(:patient)
+      appointments = @clinic.appointments.includes(:patient, :service)
         .where(starts_at: @date.all_day)
         .where.not(status: :cancelled)
         .order(:starts_at)
