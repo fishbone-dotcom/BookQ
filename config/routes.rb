@@ -31,6 +31,13 @@ Rails.application.routes.draw do
     get "reports/appointments", to: "reports#appointments", as: :reports_appointments
     get "reports/patients", to: "reports#patients", as: :reports_patients
     get "reports/services", to: "reports#services", as: :reports_services
+
+    get "settings", to: "settings#show", as: :settings
+    get "settings/clinic", to: "clinic_settings#edit", as: :edit_clinic_settings
+    patch "settings/clinic", to: "clinic_settings#update", as: :clinic_settings
+    get "settings/hours", to: "availabilities#index", as: :availabilities
+    patch "settings/hours", to: "availabilities#update"
+    resources :clinic_staffs, only: [ :index, :update, :destroy ]
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

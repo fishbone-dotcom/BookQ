@@ -45,6 +45,17 @@ Every field these pages need already exists on `Clinic`, `ClinicStaff`, `User`,
       details page for v1 ("Payment Status" badge needs either a stub column
       or should be cut until [15 Billing & Payments](15_billing_payments.md)
       exists)
+- [x] [16 — Settings](16_settings.md) (partial, per the doc's own recommended
+      order) — `Staff::SettingsController` landing page (owner-only rows show
+      as disabled "Owner only", not dead links) + `Staff::ClinicSettingsController`
+      (Clinic Information), `Staff::AvailabilitiesController` (Working Hours,
+      one form for all 7 days, same `end_time_after_start_time` validation as
+      `Availability` already had), `Staff::ClinicStaffsController` (Users &
+      Roles — role change/remove are owner-only via `before_action`, and an
+      owner can't change/remove their own row). Profile/Change Password/Logout
+      just link to existing Devise pages. Branches, Preferences, and Backup &
+      Restore cut per the doc's explicit recommendation — no defined spec
+      behind any of them yet.
 - [x] [13 — Reports](13_reports.md) (partial) — `Staff::ReportsController`,
       landing grid + the 3 zero-migration reports (Appointments, Patient,
       Services), each with a working period filter (This Week/Month, Last
@@ -70,9 +81,6 @@ these as separate feature proposals to size individually before starting:
 - [ ] [15 — Billing & Payments](15_billing_payments.md) (new subsystem — skipped
   for now per user decision; scope question (manual record-keeping vs. payment
   gateway integration) still needs an answer before starting)
-- [ ] [16 — Settings](16_settings.md) (mixed — some rows map to real features like
-  Working Hours/`Availability`, others like Backup & Restore don't exist anywhere
-  in the app yet)
 
 ## Workflow for each page
 

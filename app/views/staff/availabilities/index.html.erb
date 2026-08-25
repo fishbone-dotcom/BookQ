@@ -1,0 +1,25 @@
+<% content_for(:page_title, "Working Hours") %>
+
+<%= link_to staff_settings_path, class: "inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 -mt-1 mb-4" do %>
+  ← Back
+<% end %>
+
+<%= form_with url: staff_availabilities_path, method: :patch, class: "flex flex-col gap-3" do %>
+  <% @availabilities.each do |day, availability| %>
+    <div class="bg-white border border-gray-200 rounded-xl p-3 shadow-sm">
+      <label class="flex items-center justify-between gap-3 mb-2 cursor-pointer">
+        <span class="text-sm font-medium text-gray-900"><%= day.capitalize %></span>
+        <input type="checkbox" name="availabilities[<%= day %>][open]" value="1" <%= "checked" if availability %>
+          class="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+      </label>
+      <div class="grid grid-cols-2 gap-2">
+        <input type="time" name="availabilities[<%= day %>][start_time]" value="<%= availability&.start_time&.strftime("%H:%M") || "09:00" %>"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        <input type="time" name="availabilities[<%= day %>][end_time]" value="<%= availability&.end_time&.strftime("%H:%M") || "17:00" %>"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+      </div>
+    </div>
+  <% end %>
+
+  <%= submit_tag "Save Working Hours", class: "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl cursor-pointer transition mt-2" %>
+<% end %>

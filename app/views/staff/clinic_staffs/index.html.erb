@@ -1,0 +1,45 @@
+<% content_for(:page_title, "Users & Roles") %>
+
+<%= link_to staff_settings_path, class: "inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 -mt-1 mb-4" do %>
+  ← Back
+<% end %>
+
+<div class="flex flex-col gap-2">
+  <% @clinic_staffs.each do |clinic_staff| %>
+    <% is_self = clinic_staff.user_id == current_user.id %>
+    <div class="bg-white border border-gray-200 rounded-xl p-3 shadow-sm">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="w-9 h-9 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm font-semibold flex-none"><%= initials_for(clinic_staff.user) %></span>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-semibold text-gray-900 truncate">
+            <%= clinic_staff.user.display_name %>
+            <% if is_self %><span class="text-xs text-gray-400 font-normal">(You)</span><% end %>
+          </p>
+          <p class="text-xs text-gray-500 truncate"><%= clinic_staff.user.email %></p>
+        </div>
+      </div>
+
+      <% if is_self %>
+        <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-600"><%= clinic_staff.owner? ? "Owner" : "Staff" %></span>
+      <% else %>
+        <div class="flex items-center gap-2">
+          <%= form_with url: staff_clinic_staff_path(clinic_staff), method: :patch, data: { controller: "auto-submit" }, class: "flex-1" do %>
+            <div class="grid grid-cols-2 gap-2">
+              <label class="relative flex items-center justify-center border border-gray-200 rounded-lg py-1.5 text-xs font-medium text-gray-700 cursor-pointer has-checked:border-emerald-600 has-checked:bg-emerald-600 has-checked:text-white transition">
+                <input type="radio" name="role" value="staff" class="sr-only" data-action="change->auto-submit#submit" <%= "checked" if clinic_staff.staff? %>>
+                Staff
+              </label>
+              <label class="relative flex items-center justify-center border border-gray-200 rounded-lg py-1.5 text-xs font-medium text-gray-700 cursor-pointer has-checked:border-emerald-600 has-checked:bg-emerald-600 has-checked:text-white transition">
+                <input type="radio" name="role" value="owner" class="sr-only" data-action="change->auto-submit#submit" <%= "checked" if clinic_staff.owner? %>>
+                Owner
+              </label>
+            </div>
+          <% end %>
+          <%= button_to "Remove", staff_clinic_staff_path(clinic_staff), method: :delete,
+                data: { turbo_confirm: "Remove #{clinic_staff.user.display_name} from this clinic?" },
+                class: "text-xs text-red-600 hover:text-red-700 font-medium px-2 py-1.5 cursor-pointer shrink-0" %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
