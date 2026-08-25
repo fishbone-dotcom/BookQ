@@ -48,12 +48,13 @@
                when "confirmed" then "bg-emerald-100 border-emerald-400 text-emerald-800"
                else "bg-gray-100 border-gray-300 text-gray-700"
                end %>
-          <div class="absolute rounded-md border px-1.5 py-0.5 overflow-hidden flex items-center <%= color_class %>"
-               style="top: <%= start_offset %>px; height: <%= block_height %>px; left: <%= left_pct %>%; width: calc(<%= width_pct %>% - 4px);">
+          <%= link_to edit_staff_appointment_path(appointment, date: @date.iso8601),
+                class: "absolute rounded-md border px-1.5 py-0.5 overflow-hidden flex items-center hover:brightness-95 transition #{color_class}",
+                style: "top: #{start_offset}px; height: #{block_height}px; left: #{left_pct}%; width: calc(#{width_pct}% - 4px);" do %>
             <p class="text-[9px] font-semibold truncate leading-tight">
               <%= appointment.patient.display_name %> | <%= appointment.service.name %>
             </p>
-          </div>
+          <% end %>
         <% end %>
       </div>
     </div>

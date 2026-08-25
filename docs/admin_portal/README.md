@@ -34,7 +34,13 @@ Every field these pages need already exists on `Clinic`, `ClinicStaff`, `User`,
 - [x] [05 — Patients list](05_patients_list.md) — `Staff::PatientsController#index`, new `PatientProfile` model (`has_one` off `User`, mirrors the `ClinicStaff` precedent from page 03)
 - [ ] [06 — Patient Profile](06_patient_profile.md) — needs address, blood type,
   allergies, emergency contact on `User`
-- [ ] [11 — Appointment Details](11_appointment_details.md) — mostly Phase 1, but the
+- [x] [11 — Appointment Details](11_appointment_details.md) — simplified per user
+      request: selecting an appointment (list row or calendar block) goes
+      straight to `Staff::AppointmentsController#edit`, an edit-and-save form
+      (reuses `AppointmentBooking#reschedule` + `SlotFinder#exclude_appointment_id`,
+      the same pattern the patient-side reschedule flow already used), with a
+      Cancel Appointment action on the same page — no separate read-only
+      details page for v1
   "Payment Status" badge needs either a stub column or should be cut until
   [15 Billing & Payments](15_billing_payments.md) exists
 

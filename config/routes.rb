@@ -18,7 +18,11 @@ Rails.application.routes.draw do
   namespace :staff do
     resource :dashboard, only: [ :show ]
     resource :active_clinic, only: [ :update ]
-    resources :appointments, only: [ :index, :new, :create ]
+    resources :appointments, only: [ :index, :new, :create, :edit, :update ] do
+      member do
+        patch :cancel
+      end
+    end
     resource :calendar, only: [ :show ]
     resources :doctors, only: [ :index, :new, :create ]
     resources :patients, only: [ :index ]

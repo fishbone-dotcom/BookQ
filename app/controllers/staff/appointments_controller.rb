@@ -30,6 +30,34 @@ module Staff
       end
     end
 
+    def edit
+      @appointment = @clinic.appointments.find(params[:id])
+      load_edit_context(@appointment)
+    end
+
+    def update
+      @appointment = @clinic.appointments.find(params[:id])
+      result = AppointmentBooking.new(clinic: @clinic, params: params).reschedule(@appointment)
+
+      if result.success?
+        redirect_to staff_appointments_path(date: result.appointment.starts_at.to_date.iso8601),
+          notice: "Appointment updated."
+      else
+        redirect_to_edit(alert: result.error)
+      end
+    end
+
+    def cancel
+      appointment = @clinic.appointments.find(params[:id])
+
+      if appointment.active?
+        appointment.cancel!
+        redirect_to staff_appointments_path(date: appointment.starts_at.to_date.iso8601), notice: "Appointment cancelled."
+      else
+        redirect_to staff_appointments_path(date: appointment.starts_at.to_date.iso8601), alert: "This appointment can no longer be cancelled."
+      end
+    end
+
     private
 
     def patient_scope
@@ -38,6 +66,11 @@ module Staff
 
     def redirect_to_new(**flash)
       redirect_to new_staff_appointment_path(patient_id: params[:patient_id], service_id: params[:service_id],
+        staff_id: params[:staff_id], date: params[:date]), **flash
+    end
+
+    def redirect_to_edit(**flash)
+      redirect_to edit_staff_appointment_path(@appointment, service_id: params[:service_id],
         staff_id: params[:staff_id], date: params[:date]), **flash
     end
 
@@ -52,6 +85,17 @@ module Staff
       @date = parse_date(params[:date])
 
       @slots = @service && @date ? SlotFinder.new(clinic: @clinic, service: @service, date: @date).slots : []
+    end
+
+    def load_edit_context(appointment)
+      @services = @clinic.services.order(:name)
+      @clinic_staffs = @clinic.clinic_staffs.includes(:user).joins(:user).order("users.name")
+
+      @service = @services.find_by(id: params[:service_id]) || appointment.service
+      @staff_id = params.key?(:staff_id) ? params[:staff_id].presence : appointment.staff_id&.to_s
+      @date = parse_date(params[:date]) || appointment.starts_at.to_date
+
+      @slots = @service && @date ? SlotFinder.new(clinic: @clinic, service: @service, date: @date, exclude_appointment_id: appointment.id).slots : []
     end
 
     def filter_by_status(scope)
