@@ -67,7 +67,9 @@ these as separate feature proposals to size individually before starting:
 - [ ] [14 — Inventory](14_inventory.md) (new subsystem, unrelated to appointments —
   skipped for now per user decision; it's the single largest net-new
   subsystem in the whole mockup, confirm scope before starting)
-- [ ] [15 — Billing & Payments](15_billing_payments.md) (new subsystem)
+- [ ] [15 — Billing & Payments](15_billing_payments.md) (new subsystem — skipped
+  for now per user decision; scope question (manual record-keeping vs. payment
+  gateway integration) still needs an answer before starting)
 - [ ] [16 — Settings](16_settings.md) (mixed — some rows map to real features like
   Working Hours/`Availability`, others like Backup & Restore don't exist anywhere
   in the app yet)
