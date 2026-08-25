@@ -61,6 +61,10 @@
   </div>
 <% end %>
 
-<%= link_to new_staff_appointment_path(date: @date.iso8601), class: "fixed bottom-24 right-4 z-10 w-12 h-12 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shadow-lg transition" do %>
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-<% end %>
+<div class="fixed inset-x-0 bottom-24 z-10 pointer-events-none">
+  <div class="max-w-md mx-auto relative px-4">
+    <%= link_to new_staff_appointment_path(date: @date.iso8601), class: "absolute right-4 bottom-0 w-12 h-12 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shadow-lg transition pointer-events-auto" do %>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    <% end %>
+  </div>
+</div>
