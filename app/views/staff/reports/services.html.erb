@@ -1,0 +1,28 @@
+<% content_for(:page_title, "Services Report") %>
+
+<%= link_to staff_reports_path, class: "inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 -mt-1 mb-4" do %>
+  ← Back
+<% end %>
+
+<%= render "staff/reports/period_filter", current_period: @period, path_for: ->(period) { staff_reports_services_path(period: period) } %>
+
+<% if @service_counts.empty? %>
+  <div class="bg-white border border-gray-200 rounded-xl p-4 text-center text-sm text-gray-500 shadow-sm">
+    No bookings in this period.
+  </div>
+<% else %>
+  <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col gap-3">
+    <% @service_counts.each do |name, count| %>
+      <% pct = @total.zero? ? 0 : (count * 100.0 / @total).round %>
+      <div>
+        <div class="flex justify-between text-sm mb-1">
+          <span class="text-gray-700"><%= name %></span>
+          <span class="text-gray-500"><%= count %> (<%= pct %>%)</span>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-2">
+          <div class="bg-emerald-600 h-2 rounded-full" style="width: <%= pct %>%;"></div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>

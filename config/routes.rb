@@ -26,6 +26,11 @@ Rails.application.routes.draw do
     resource :calendar, only: [ :show ]
     resources :doctors, only: [ :index, :new, :create ]
     resources :patients, only: [ :index, :show, :edit, :update ]
+
+    get "reports", to: "reports#index", as: :reports
+    get "reports/appointments", to: "reports#appointments", as: :reports_appointments
+    get "reports/patients", to: "reports#patients", as: :reports_patients
+    get "reports/services", to: "reports#services", as: :reports_services
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

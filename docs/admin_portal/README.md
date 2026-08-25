@@ -42,9 +42,17 @@ Every field these pages need already exists on `Clinic`, `ClinicStaff`, `User`,
       (reuses `AppointmentBooking#reschedule` + `SlotFinder#exclude_appointment_id`,
       the same pattern the patient-side reschedule flow already used), with a
       Cancel Appointment action on the same page — no separate read-only
-      details page for v1
-  "Payment Status" badge needs either a stub column or should be cut until
-  [15 Billing & Payments](15_billing_payments.md) exists
+      details page for v1 ("Payment Status" badge needs either a stub column
+      or should be cut until [15 Billing & Payments](15_billing_payments.md)
+      exists)
+- [x] [13 — Reports](13_reports.md) (partial) — `Staff::ReportsController`,
+      landing grid + the 3 zero-migration reports (Appointments, Patient,
+      Services), each with a working period filter (This Week/Month, Last
+      Month, All Time). Doctors Performance, Revenue, and Inventory reports
+      shown as disabled "Soon" cards — blocked on 07/14/15 per the doc's own
+      dependency table. 07/08 (Patient Records) explicitly skipped per user
+      request — EMR-lite scope needs client confirmation given the privacy/
+      compliance weight, so it's parked rather than built speculatively.
 
 ## Phase 3 — needs brand-new subsystems
 
@@ -52,9 +60,10 @@ Each of these needs at least one new model/table and isn't part of BookQ's curre
 scope (per `CLAUDE.md`: a booking app, not an EMR/inventory/billing system). Treat
 these as separate feature proposals to size individually before starting:
 
-- [ ] [07 — Patient Records](07_patient_records.md) (medical records subsystem)
-- [ ] [08 — Add Medical Record](08_add_medical_record.md)
-- [ ] [13 — Reports](13_reports.md) (depends on whichever of the above exist)
+- [ ] [07 — Patient Records](07_patient_records.md) (medical records subsystem —
+  skipped for now; confirm with client before building given clinical-data
+  privacy/compliance weight)
+- [ ] [08 — Add Medical Record](08_add_medical_record.md) (blocked on 07)
 - [ ] [14 — Inventory](14_inventory.md) (new subsystem, unrelated to appointments)
 - [ ] [15 — Billing & Payments](15_billing_payments.md) (new subsystem)
 - [ ] [16 — Settings](16_settings.md) (mixed — some rows map to real features like
