@@ -12,9 +12,9 @@
             class: "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap #{@status == status ? "bg-emerald-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}" %>
     <% end %>
   </div>
-  <span class="w-8 h-8 rounded-full bg-gray-100 text-gray-300 flex items-center justify-center shrink-0 ml-2" title="Add Appointment — coming soon">
+  <%= link_to new_staff_appointment_path(date: @date.iso8601), class: "w-8 h-8 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shrink-0 ml-2 transition" do %>
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-  </span>
+  <% end %>
 </div>
 
 <% if @appointments.empty? %>

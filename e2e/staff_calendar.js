@@ -36,7 +36,7 @@ const path = require("path");
     console.log("  (landed on a day with no availability — closed-state check below covers this instead)");
   }
 
-  check("floating add button is present but inert (page 10 not built yet)", await page.locator('span[title*="coming soon"]').count() > 0);
+  check("floating add button links to Add Appointment", await page.locator('a[href^="/staff/appointments/new"]').count() > 0);
 
   // A day the seeded clinic has no Availability row for should show the closed state.
   await page.goto(`${baseUrl}/staff/calendar?date=${nextSunday()}`);

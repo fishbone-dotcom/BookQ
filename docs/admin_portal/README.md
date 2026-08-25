@@ -22,7 +22,7 @@ Every field these pages need already exists on `Clinic`, `ClinicStaff`, `User`,
 - [x] [01 — Dashboard](01_dashboard.md) — `Staff::DashboardsController`, `7e49526`
 - [x] [02 — Navigation drawer](02_navigation.md) — `layouts/staff.html.erb` + `staff/_navigation`
 - [x] [09 — Appointments list](09_appointments_list.md) — `Staff::AppointmentsController#index`
-- [ ] [10 — Add Appointment](10_add_appointment.md)
+- [x] [10 — Add Appointment](10_add_appointment.md) — `Staff::AppointmentsController#new/#create`, reuses `AppointmentBooking`
 - [x] [12 — Calendar View](12_calendar_view.md) — `Staff::CalendarsController#show`, `CalendarLayout`
 
 ## Phase 2 — small migrations (new columns on existing models, no new tables)

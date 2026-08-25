@@ -25,13 +25,18 @@ class AppointmentBooking
   attr_reader :clinic, :params
 
   def attributes
-    {
+    attrs = {
       clinic: clinic,
       service: service,
       staff: staff,
       starts_at: starts_at,
       ends_at: starts_at + service.duration_minutes.minutes
     }
+    # Only touch notes when the caller's form actually has a notes field —
+    # otherwise reschedule (no notes field on the patient side) would wipe
+    # out notes a staffer had already set via the Add Appointment form.
+    attrs[:notes] = params[:notes].presence if params.key?(:notes)
+    attrs
   end
 
   def service

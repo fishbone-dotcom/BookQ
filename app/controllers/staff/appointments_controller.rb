@@ -12,7 +12,47 @@ module Staff
       @appointments = filter_by_status(scope).order(:starts_at)
     end
 
+    def new
+      load_new_appointment_context
+    end
+
+    def create
+      patient = patient_scope.find_by(id: params[:patient_id])
+      return redirect_to_new(alert: "Please select a patient.") if patient.nil?
+
+      result = AppointmentBooking.new(clinic: @clinic, params: params).create_for(patient)
+
+      if result.success?
+        redirect_to staff_appointments_path(date: result.appointment.starts_at.to_date.iso8601),
+          notice: "Appointment booked for #{patient.display_name}."
+      else
+        redirect_to_new(alert: result.error)
+      end
+    end
+
     private
+
+    def patient_scope
+      User.where(role: :patient)
+    end
+
+    def redirect_to_new(**flash)
+      redirect_to new_staff_appointment_path(patient_id: params[:patient_id], service_id: params[:service_id],
+        staff_id: params[:staff_id], date: params[:date]), **flash
+    end
+
+    def load_new_appointment_context
+      @patients = patient_scope.order(:name, :email)
+      @services = @clinic.services.order(:name)
+      @clinic_staffs = @clinic.clinic_staffs.includes(:user).joins(:user).order("users.name")
+
+      @patient_id = params[:patient_id].presence
+      @service = @services.find_by(id: params[:service_id]) || @services.first
+      @staff_id = params.key?(:staff_id) ? params[:staff_id].presence : nil
+      @date = parse_date(params[:date])
+
+      @slots = @service && @date ? SlotFinder.new(clinic: @clinic, service: @service, date: @date).slots : []
+    end
 
     def filter_by_status(scope)
       case @status
