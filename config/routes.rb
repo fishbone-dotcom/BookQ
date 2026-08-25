@@ -1,5 +1,8 @@
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :users, controllers: { registrations: "users/registrations" }
+  devise_scope :user do
+    get "users/change_password", to: "users/registrations#edit_password", as: :edit_user_change_password
+  end
 
   resources :clinics, only: [] do
     resource :booking, only: [ :show, :create ], controller: "bookings"

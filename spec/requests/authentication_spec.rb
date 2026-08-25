@@ -29,7 +29,7 @@ RSpec.describe "Authentication", type: :request do
       expect(response).to redirect_to(new_user_session_path)
     end
 
-    it "renders the edit form for a signed-in user" do
+    it "renders the edit form for a signed-in user, with no password fields on it" do
       user = create(:user)
       sign_in user
 
@@ -37,17 +37,63 @@ RSpec.describe "Authentication", type: :request do
 
       expect(response).to have_http_status(:success)
       expect(response.body).to include(user.email)
+      expect(response.body).not_to include('name="user[password]"')
+      expect(response.body).not_to include('name="user[password_confirmation]"')
+      expect(response.body).to include("Change Password")
     end
 
-    it "updates the email with the current password confirmed" do
+    it "updates the name and email with the current password confirmed" do
       user = create(:user, password: "password123", password_confirmation: "password123")
       sign_in user
 
       put user_registration_path, params: {
-        user: { email: "updated@example.com", current_password: "password123" }
+        user: { name: "New Name", email: "updated@example.com", current_password: "password123" }
       }
 
-      expect(user.reload.email).to eq("updated@example.com")
+      user.reload
+      expect(user.name).to eq("New Name")
+      expect(user.email).to eq("updated@example.com")
+    end
+  end
+
+  describe "change password" do
+    it "requires authentication" do
+      get edit_user_change_password_path
+      expect(response).to redirect_to(new_user_session_path)
+    end
+
+    it "renders the change-password form, with no name/email fields on it" do
+      user = create(:user)
+      sign_in user
+
+      get edit_user_change_password_path
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).not_to include('name="user[email]"')
+      expect(response.body).not_to include('name="user[name]"')
+      expect(response.body).to include('name="user[password]"')
+    end
+
+    it "updates the password with the current password confirmed" do
+      user = create(:user, password: "password123", password_confirmation: "password123")
+      sign_in user
+
+      put user_registration_path, params: {
+        user: { password: "newpassword456", password_confirmation: "newpassword456", current_password: "password123" }
+      }
+
+      expect(user.reload.valid_password?("newpassword456")).to be true
+    end
+
+    it "does not update the password without the correct current password" do
+      user = create(:user, password: "password123", password_confirmation: "password123")
+      sign_in user
+
+      put user_registration_path, params: {
+        user: { password: "newpassword456", password_confirmation: "newpassword456", current_password: "wrongpassword" }
+      }
+
+      expect(user.reload.valid_password?("newpassword456")).to be false
     end
   end
 
