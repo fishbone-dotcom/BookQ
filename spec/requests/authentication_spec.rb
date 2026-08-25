@@ -23,6 +23,34 @@ RSpec.describe "Authentication", type: :request do
     end
   end
 
+  describe "edit profile" do
+    it "requires authentication" do
+      get edit_user_registration_path
+      expect(response).to redirect_to(new_user_session_path)
+    end
+
+    it "renders the edit form for a signed-in user" do
+      user = create(:user)
+      sign_in user
+
+      get edit_user_registration_path
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include(user.email)
+    end
+
+    it "updates the email with the current password confirmed" do
+      user = create(:user, password: "password123", password_confirmation: "password123")
+      sign_in user
+
+      put user_registration_path, params: {
+        user: { email: "updated@example.com", current_password: "password123" }
+      }
+
+      expect(user.reload.email).to eq("updated@example.com")
+    end
+  end
+
   describe "log in" do
     it "logs in an existing user with correct credentials" do
       user = create(:user, password: "password123", password_confirmation: "password123")
