@@ -28,6 +28,12 @@ const path = require("path");
   check("styled with the app's card/form conventions (rounded input classes present)", await page.locator("input.rounded-lg").count() > 0);
   check("has a styled Save Changes button", await page.locator('input[type="submit"][value="Save Changes"]').count() === 1);
   check("has a Back link", await page.locator("text=← Back").count() === 1);
+
+  await page.click("text=← Back");
+  await page.waitForURL(`${baseUrl}/staff/settings`, { timeout: 10000 });
+  check("Back link returns to the actual previous page (Settings), not a fixed home page", page.url() === `${baseUrl}/staff/settings`);
+  await page.goBack();
+  await pause();
   check("Cancel my account is styled as a danger button, not a plain link", await page.locator('button:has-text("Cancel my account")').count() === 1);
 
   check("no browser console/page errors", consoleErrors.length === 0);
