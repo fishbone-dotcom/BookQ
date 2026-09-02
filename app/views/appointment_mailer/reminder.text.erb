@@ -1,0 +1,15 @@
+Hi <%= @appointment.patient.name.presence || @appointment.patient.email %>,
+
+This is a reminder that you have an upcoming appointment tomorrow:
+
+Clinic: <%= @clinic.name %>
+Service: <%= @service.name %>
+<% if @appointment.staff.present? -%>
+With: <%= @appointment.staff.name.presence || @appointment.staff.email %>
+<% end -%>
+When: <%= @appointment.starts_at.strftime("%A, %B %-d, %Y at %-I:%M %p") %>
+<% if @clinic.address.present? -%>
+Address: <%= @clinic.address %>
+<% end -%>
+
+See you then! If you need to reschedule or cancel, please do so from your BookQ account.
