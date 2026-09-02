@@ -20,6 +20,12 @@ patient = User.find_or_create_by!(email: "patient@bookq.test") do |u|
   u.role = :patient
 end
 
+patient2 = User.find_or_create_by!(email: "patient2@bookq.test") do |u|
+  u.password = "password123"
+  u.password_confirmation = "password123"
+  u.role = :patient
+end
+
 User.find_or_create_by!(email: "admin@bookq.test") do |u|
   u.password = "password123"
   u.password_confirmation = "password123"
@@ -55,19 +61,29 @@ end
   end
 end
 
+# Appointment times below are relative to "now", so a stale one from an
+# earlier seed run at a different time won't match find_or_create_by's
+# starts_at lookup — clear it first to keep this idempotent.
+patient.patient_appointments.active.destroy_all
+patient2.patient_appointments.active.destroy_all
+
+# Within the 24-hour reminder window (SendAppointmentRemindersJob) so a seed
+# run followed by that job actually produces a sample reminder email.
 Appointment.find_or_create_by!(patient: patient, clinic: clinic, service: checkup, staff: doctor,
-  starts_at: 1.day.from_now.change(hour: 10, min: 0)) do |appt|
+  starts_at: 18.hours.from_now.change(min: 0)) do |appt|
   appt.ends_at = appt.starts_at + checkup.duration_minutes.minutes
   appt.status = :confirmed
 end
 
-Appointment.find_or_create_by!(patient: patient, clinic: clinic, service: consultation, staff: doctor,
+# Outside the reminder window, for contrast — should NOT get a reminder yet.
+Appointment.find_or_create_by!(patient: patient2, clinic: clinic, service: consultation, staff: doctor,
   starts_at: 2.days.from_now.change(hour: 14, min: 0)) do |appt|
   appt.ends_at = appt.starts_at + consultation.duration_minutes.minutes
   appt.status = :pending
 end
 
 patient.update!(name: "Juana Dela Cruz")
+patient2.update!(name: "Pedro Reyes")
 
 PatientProfile.find_or_create_by!(user: patient) do |profile|
   profile.birthdate = Date.new(1996, 3, 14)
@@ -81,5 +97,17 @@ PatientProfile.find_or_create_by!(user: patient) do |profile|
   profile.emergency_contact_phone = "0917-555-5678"
 end
 
+PatientProfile.find_or_create_by!(user: patient2) do |profile|
+  profile.birthdate = Date.new(1990, 7, 22)
+  profile.sex = "Male"
+  profile.phone = "0917-555-9876"
+  profile.address = "78 Bonifacio Ave, Quezon City"
+  profile.blood_type = "A+"
+  profile.allergies = "Penicillin"
+  profile.emergency_contact_name = "Ana Reyes"
+  profile.emergency_contact_relationship = "Spouse"
+  profile.emergency_contact_phone = "0917-555-4321"
+end
+
 puts "Seeded: #{User.count} users, #{Clinic.count} clinic, #{Service.count} services, #{Appointment.count} appointments"
-puts "Log in as owner@bookq.test / doctor@bookq.test / patient@bookq.test / admin@bookq.test, password: password123"
+puts "Log in as owner@bookq.test / doctor@bookq.test / patient@bookq.test / patient2@bookq.test / admin@bookq.test, password: password123"
