@@ -1,8 +1,5 @@
 <% content_for(:page_title, "Users & Roles") %>
-
-<%= link_to staff_settings_path, class: "inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 -mt-1 mb-4" do %>
-  ← Back
-<% end %>
+<% content_for(:back_path, staff_settings_path) %>
 
 <div class="flex flex-col gap-2">
   <% @clinic_staffs.each do |clinic_staff| %>

@@ -1,8 +1,5 @@
 <% content_for(:page_title, "Add Appointment") %>
-
-<%= link_to staff_appointments_path(date: @date&.iso8601), class: "inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 -mt-1" do %>
-  ← Back
-<% end %>
+<% content_for(:back_path, staff_appointments_path(date: @date&.iso8601)) %>
 
 <%= form_with url: new_staff_appointment_path, method: :get, data: { controller: "auto-submit" }, class: "flex flex-col gap-5" do %>
   <%= hidden_field_tag :patient_id, @patient_id %>
