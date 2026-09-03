@@ -8,28 +8,28 @@
 <div class="grid grid-cols-2 gap-3">
   <div class="bg-white border border-gray-200 rounded-xl px-4 py-3">
     <span class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <%= render "icons/calendar", size: 16 %>
     </span>
     <p class="text-2xl font-bold text-gray-900"><%= @today_appointments_count %></p>
     <p class="text-xs text-gray-500">Today's Appointments</p>
   </div>
   <div class="bg-white border border-gray-200 rounded-xl px-4 py-3">
     <span class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <%= render "icons/users", size: 16 %>
     </span>
     <p class="text-2xl font-bold text-gray-900"><%= @total_patients_count %></p>
     <p class="text-xs text-gray-500">Total Patients</p>
   </div>
   <div class="bg-white border border-gray-200 rounded-xl px-4 py-3">
     <span class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h2M15 12h2M7 16h10"/></svg>
+      <%= render "icons/doctors", size: 16 %>
     </span>
     <p class="text-2xl font-bold text-gray-900"><%= @doctors_count %></p>
     <p class="text-xs text-gray-500">Doctors</p>
   </div>
   <div class="bg-white border border-gray-200 rounded-xl px-4 py-3">
     <span class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+      <%= render "icons/user_plus", size: 16 %>
     </span>
     <p class="text-2xl font-bold text-gray-900"><%= @new_patients_this_month_count %></p>
     <p class="text-xs text-gray-500">New Patients (This Month)</p>

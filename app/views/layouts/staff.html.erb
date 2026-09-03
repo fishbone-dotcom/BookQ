@@ -28,11 +28,11 @@
         <div class="flex items-center gap-3">
           <% if content_for?(:back_path) %>
             <%= link_to content_for(:back_path), class: "text-gray-400 hover:text-gray-600" do %>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              <%= render "icons/back_arrow" %>
             <% end %>
           <% else %>
             <button type="button" data-action="staff-nav#open" class="text-gray-400 hover:text-gray-600">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+              <%= render "icons/hamburger" %>
             </button>
           <% end %>
           <h1 class="text-lg font-bold text-gray-900"><%= content_for(:page_title) || "Dashboard" %></h1>
@@ -41,7 +41,7 @@
           <%= content_for(:header_action) %>
         <% else %>
           <span class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <%= render "icons/bell", size: 17 %>
           </span>
         <% end %>
       </div>
@@ -59,19 +59,19 @@
     <% unless content_for?(:back_path) %>
       <nav class="fixed bottom-0 inset-x-0 max-w-md mx-auto bg-white border-t border-gray-200 grid grid-cols-4 text-xs z-20">
         <%= link_to staff_dashboard_path, class: "flex flex-col items-center gap-1 py-2.5 #{current_page?(staff_dashboard_path) ? "text-emerald-700" : "text-gray-400"}" do %>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
+          <%= render "icons/dashboard", size: 18 %>
           Dashboard
         <% end %>
         <%= link_to staff_appointments_path, class: "flex flex-col items-center gap-1 py-2.5 #{current_page?(staff_appointments_path) ? "text-emerald-700" : "text-gray-400"}" do %>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <%= render "icons/calendar", size: 18 %>
           Appointments
         <% end %>
         <%= link_to staff_patients_path, class: "flex flex-col items-center gap-1 py-2.5 #{current_page?(staff_patients_path) ? "text-emerald-700" : "text-gray-400"}" do %>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <%= render "icons/users", size: 18 %>
           Patients
         <% end %>
         <button type="button" data-action="staff-nav#open" class="flex flex-col items-center gap-1 py-2.5 text-gray-400 hover:text-gray-600 cursor-pointer">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+          <%= render "icons/dots_more", size: 18 %>
           More
         </button>
       </nav>

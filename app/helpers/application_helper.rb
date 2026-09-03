@@ -9,6 +9,12 @@ module ApplicationHelper
     end
   end
 
+  def icon_svg(inner, size: 20, css_class: nil)
+    content_tag(:svg, inner.html_safe, width: size, height: size, viewBox: "0 0 24 24",
+      fill: "none", stroke: "currentColor", "stroke-width": 2,
+      "stroke-linecap": "round", "stroke-linejoin": "round", class: css_class)
+  end
+
   def time_of_day_greeting
     hour = Time.current.hour
     if hour < 12

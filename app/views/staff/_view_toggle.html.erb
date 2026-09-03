@@ -2,12 +2,12 @@
 <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1 w-fit ml-auto mb-3">
   <%= link_to staff_appointments_path(date: date.iso8601),
         class: "flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium #{active == "list" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"}" do %>
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+    <%= render "icons/list", size: 14 %>
     List
   <% end %>
   <%= link_to staff_calendar_path(date: date.iso8601),
         class: "flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium #{active == "calendar" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"}" do %>
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    <%= render "icons/calendar", size: 14 %>
     Calendar
   <% end %>
 </div>
