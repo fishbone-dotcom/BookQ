@@ -16,11 +16,8 @@
     </div>
   <% end %>
 
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1.5">Birthdate</label>
-    <%= f.date_field :birthdate, max: Date.current.iso8601,
-          class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" %>
-  </div>
+  <%= render "shared/form_field", form: f, attribute: :birthdate, label: "Birthdate", type: :date,
+        html_options: { max: Date.current.iso8601 } %>
 
   <div>
     <label class="block text-sm font-medium text-gray-700 mb-1.5">Sex</label>
@@ -34,29 +31,13 @@
     </div>
   </div>
 
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
-    <%= f.text_field :phone, placeholder: "Enter phone number",
-          class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" %>
-  </div>
+  <%= render "shared/form_field", form: f, attribute: :phone, label: "Phone", placeholder: "Enter phone number" %>
 
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1.5">Address</label>
-    <%= f.text_field :address, placeholder: "Enter address",
-          class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" %>
-  </div>
+  <%= render "shared/form_field", form: f, attribute: :address, label: "Address", placeholder: "Enter address" %>
 
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1.5">Blood Type</label>
-    <%= f.text_field :blood_type, placeholder: "e.g. O+",
-          class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" %>
-  </div>
+  <%= render "shared/form_field", form: f, attribute: :blood_type, label: "Blood Type", placeholder: "e.g. O+" %>
 
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1.5">Allergies</label>
-    <%= f.text_area :allergies, rows: 2, placeholder: "e.g. None",
-          class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" %>
-  </div>
+  <%= render "shared/form_field", form: f, attribute: :allergies, label: "Allergies", type: :textarea, rows: 2, placeholder: "e.g. None" %>
 
   <div class="border-t border-gray-100 pt-4">
     <h3 class="text-xs font-medium text-gray-500 uppercase mb-3">Emergency Contact</h3>

@@ -162,6 +162,13 @@ function cleanup() {
       await page.waitForURL(/\/staff\/patients\/\d+$/, { timeout: 10000 });
       await pause();
       check("Patient Profile loads with tabs", (await page.locator("body").innerText()).includes("Personal Information"));
+
+      // Patient Profile is a focused sub-page (back arrow instead of the
+      // hamburger menu, by design — see the staff.html.erb back_path
+      // convention), so return to the Patients list before opening the
+      // drawer again.
+      await page.goto(`${baseUrl}/staff/patients`);
+      await pause();
     }
 
     // Reports — landing + the 3 built reports.
@@ -185,6 +192,10 @@ function cleanup() {
     }
 
     // Settings — landing + Clinic Info + Working Hours + Users & Roles (view only, no saves).
+    // Report detail pages are also focused sub-pages (back arrow, no
+    // hamburger) — return to the dashboard before opening the drawer again.
+    await page.goto(`${baseUrl}/staff/dashboard`);
+    await pause();
     console.log("→ Settings landing");
     await openDrawer();
     await Promise.all([ page.waitForURL(`${baseUrl}/staff/settings`, { timeout: 10000 }), page.click('aside a:has-text("Settings")') ]);

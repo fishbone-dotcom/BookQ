@@ -1,0 +1,20 @@
+<%# locals: (label:, type: :text, form: nil, attribute: nil, name: nil, value: nil, placeholder: nil, required: false, rows: nil, hint: nil, html_options: {}) %>
+<div>
+  <label class="block text-sm font-medium text-gray-700 mb-1.5"><%= label %></label>
+  <% css_class = "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" %>
+  <% opts = (local_assigns[:html_options] || {}).merge(placeholder: local_assigns[:placeholder], class: css_class) %>
+  <% if local_assigns[:form] %>
+    <% if type == :textarea %>
+      <%= form.text_area attribute, **opts.merge(rows: local_assigns[:rows] || 3) %>
+    <% else %>
+      <%= form.public_send("#{type}_field", attribute, **opts) %>
+    <% end %>
+  <% elsif type == :textarea %>
+    <%= text_area_tag name, local_assigns[:value], **opts.merge(rows: local_assigns[:rows] || 3) %>
+  <% else %>
+    <%= text_field_tag name, local_assigns[:value], **opts.merge(type: type, required: local_assigns[:required]) %>
+  <% end %>
+  <% if local_assigns[:hint] %>
+    <p class="text-xs text-gray-500 mt-1"><%= hint %></p>
+  <% end %>
+</div>

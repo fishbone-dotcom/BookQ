@@ -48,7 +48,11 @@ function setup() {
 function cleanup() {
   try {
     execSync(
-      `cd .. && bin/rails runner 'User.where(email: ["${ownerEmail}", "${doctorAEmail}", "${doctorBEmail}", "${patientAEmail}", "${patientBEmail}"]).destroy_all'`,
+      `cd .. && bin/rails runner '` +
+        `clinic = Clinic.find_by(name: "Scope Test Clinic"); ` +
+        `clinic&.appointments&.destroy_all; ` + // Service has dependent: :restrict_with_error on
+        `clinic&.destroy; ` +                   // appointments, which would otherwise block this.
+        `User.where(email: ["${ownerEmail}", "${doctorAEmail}", "${doctorBEmail}", "${patientAEmail}", "${patientBEmail}"]).destroy_all'`,
       { stdio: "pipe" }
     );
     console.log("  cleanup: removed the throwaway clinic/doctors/patients");

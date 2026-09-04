@@ -28,7 +28,8 @@ function setup() {
 function cleanup() {
   try {
     execSync(
-      `cd .. && bin/rails runner 'User.where(email: ["${ownerEmail}", "${staffEmail}"]).destroy_all'`,
+      `cd .. && bin/rails runner 'Clinic.find_by(name: "E2E Settings Clinic")&.destroy; ` +
+        `User.where(email: ["${ownerEmail}", "${staffEmail}"]).destroy_all'`,
       { stdio: "pipe" }
     );
     console.log("  cleanup: removed the throwaway owner/clinic/staffer");
