@@ -34,8 +34,22 @@ Rails.application.configure do
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
 
-  # Preview sent emails in the browser instead of actually delivering them
-  config.action_mailer.delivery_method = :letter_opener
+  # Preview sent emails in the browser instead of actually delivering them,
+  # unless real SMTP credentials are provided via ENV (for manual testing).
+  if ENV["GMAIL_USERNAME"].present? && ENV["GMAIL_APP_PASSWORD"].present?
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = {
+      address: "smtp.gmail.com",
+      port: 587,
+      domain: "gmail.com",
+      user_name: ENV["GMAIL_USERNAME"],
+      password: ENV["GMAIL_APP_PASSWORD"],
+      authentication: "plain",
+      enable_starttls_auto: true
+    }
+  else
+    config.action_mailer.delivery_method = :letter_opener
+  end
   config.action_mailer.perform_deliveries = true
 
   # Make template changes take effect immediately.
