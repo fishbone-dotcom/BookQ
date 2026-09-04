@@ -10,6 +10,9 @@
 # Ignore all environment files.
 /.env*
 
+# Ignore SSH private keys (e.g. AWS EC2 .pem files).
+*.pem
+
 # Ignore all logfiles and tempfiles.
 /log/*
 /tmp/*
