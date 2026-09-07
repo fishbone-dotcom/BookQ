@@ -1,0 +1,12 @@
+Hi <%= @appointment.patient.name.presence || @appointment.patient.email %>,
+
+Unfortunately, your appointment<% if @appointment.staff.present? %> with <%= @appointment.staff.name.presence || @appointment.staff.email %><% end %> has had to be cancelled because they've become unavailable:
+
+Clinic: <%= @clinic.name %>
+Service: <%= @service.name %>
+Was scheduled for: <%= @appointment.starts_at.strftime("%A, %B %-d, %Y at %-I:%M %p") %>
+<% if @clinic.address.present? -%>
+Address: <%= @clinic.address %>
+<% end -%>
+
+We're sorry for the inconvenience. Please book a new time: <%= clinic_booking_url(@clinic) %>

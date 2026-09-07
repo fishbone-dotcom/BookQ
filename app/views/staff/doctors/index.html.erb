@@ -35,6 +35,8 @@
           <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-medium shrink-0 <%= clinic_staff.available? ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700" %>">
             <%= clinic_staff.available? ? "Available" : "On Leave" %>
           </span>
+          <%= link_to "Mark unavailable", new_staff_doctor_unavailability_path(clinic_staff),
+                class: "text-[11px] text-gray-400 hover:text-red-600 shrink-0 transition" %>
         </div>
       <% end %>
       <p data-staff-doctor-search-target="empty" class="hidden text-center text-sm text-gray-400 py-4">No doctors found.</p>

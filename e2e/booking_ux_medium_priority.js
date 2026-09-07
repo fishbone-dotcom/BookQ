@@ -16,10 +16,14 @@ async function goToStep3WithSelections(page, baseUrl) {
   await page.waitForLoadState("networkidle");
   await page.locator('label:has(input[name="service_id"])').first().click();
   await page.click('button[data-action*="booking-wizard#next"]');
+  await page.waitForURL(/service_id=/, { timeout: 10000 });
   await page.waitForSelector('[data-booking-wizard-target="stepPanel"][data-step="2"]:not(.hidden)');
   // pick a specific (non-"Anyone") doctor so restoring it is a meaningful check
   await page.locator('label:has(input[name="staff_id"]):not(:has(input[value=""]))').first().click();
   await page.click('button[data-action*="booking-wizard#next"]');
+  // Picking a doctor now triggers a real reload (the server needs to know
+  // who was picked before it can compute their own slots).
+  await page.waitForURL(/staff_step=/, { timeout: 10000 });
   await page.waitForSelector('[data-booking-wizard-target="stepPanel"][data-step="3"]:not(.hidden)');
 }
 
@@ -66,6 +70,9 @@ async function goToStep3WithSelections(page, baseUrl) {
     const otherDoctorLabel = page.locator('label:has(input[name="staff_id"])').filter({ hasNotText: "Dela Cruz" }).filter({ hasNotText: "Anyone" }).first();
     await otherDoctorLabel.click();
     await page.click('button[data-action*="booking-wizard#next"]');
+    // Picking a doctor now triggers a real reload (the server needs to know
+    // who was picked before it can compute their own slots).
+    await page.waitForURL(/staff_step=/, { timeout: 10000 });
     await page.waitForSelector('[data-booking-wizard-target="stepPanel"][data-step="3"]:not(.hidden)');
 
     const availableDateCell = page.locator('[data-booking-wizard-target="dateCell"]').filter({

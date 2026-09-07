@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_02_201627) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_07_104934) do
   create_table "appointments", force: :cascade do |t|
     t.integer "clinic_id", null: false
     t.datetime "created_at", null: false
@@ -33,12 +33,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_02_201627) do
 
   create_table "availabilities", force: :cascade do |t|
     t.integer "clinic_id", null: false
+    t.integer "clinic_staff_id"
     t.datetime "created_at", null: false
     t.integer "day_of_week"
     t.time "end_time"
     t.time "start_time"
     t.datetime "updated_at", null: false
+    t.index ["clinic_id", "clinic_staff_id", "day_of_week"], name: "index_availabilities_on_clinic_staff_and_day", unique: true
     t.index ["clinic_id"], name: "index_availabilities_on_clinic_id"
+    t.index ["clinic_staff_id"], name: "index_availabilities_on_clinic_staff_id"
   end
 
   create_table "clinic_staffs", force: :cascade do |t|
@@ -109,6 +112,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_02_201627) do
   add_foreign_key "appointments", "services"
   add_foreign_key "appointments", "users", column: "patient_id"
   add_foreign_key "appointments", "users", column: "staff_id"
+  add_foreign_key "availabilities", "clinic_staffs"
   add_foreign_key "availabilities", "clinics"
   add_foreign_key "clinic_staffs", "clinics"
   add_foreign_key "clinic_staffs", "users"

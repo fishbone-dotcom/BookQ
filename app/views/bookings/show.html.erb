@@ -31,7 +31,7 @@
       </div>
     <% end %>
     <div data-controller="booking-wizard"
-         data-booking-wizard-step-value="<%= @editing_appointment && @date.present? ? 4 : (@date.present? ? 3 : (params[:service_id].present? ? 2 : 1)) %>"
+         data-booking-wizard-step-value="<%= params[:staff_step].present? ? 3 : (@editing_appointment && @date.present? ? 4 : (@date.present? ? 3 : (params[:service_id].present? ? 2 : 1))) %>"
          data-booking-wizard-service-id-value="<%= @service.id %>"
          data-booking-wizard-previous-staff-value="<%= @editing_appointment&.staff&.display_name %>"
          data-booking-wizard-previous-date-value="<%= @editing_appointment&.starts_at&.strftime("%A, %B %-d") %>"
@@ -77,6 +77,23 @@
           <%= f.hidden_field :staff_id, value: @staff_id %>
         <% end %>
       </div>
+
+      <!-- Hidden GET form for the Doctor step (step 2): the radios that set
+           its value live in the main booking form below (so the final
+           choice still submits with the booking) — this form just carries
+           that value into a real reload, since the server needs to know
+           which doctor was picked before it can compute that doctor's own
+           slots for step 3. -->
+      <%= form_with url: clinic_booking_path(@clinic), method: :get, data: { "booking-wizard-target": "staffForm" }, class: "hidden" do |f| %>
+        <%= f.hidden_field :service_id, value: @service.id %>
+        <%= f.hidden_field :month, value: @month.strftime("%Y-%m") %>
+        <%= f.hidden_field :staff_id, data: { "booking-wizard-target": "staffFormStaffId" } %>
+        <%# Distinguishes "the doctor step was actually submitted" from the
+            plain staff_id carried forward by the service-step form above
+            (which would otherwise also make params.key?(:staff_id) true on
+            a fresh first visit through step 1, skipping step 2 entirely). %>
+        <%= f.hidden_field :staff_step, value: "1" %>
+      <% end %>
 
       <%= form_with url: @editing_appointment ? appointment_path(@editing_appointment) : clinic_booking_path(@clinic),
             method: @editing_appointment ? :patch : :post,

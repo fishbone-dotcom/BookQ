@@ -40,7 +40,16 @@ class BookingsController < ApplicationController
     @date = nil unless @date && @date.between?(@month, @month.end_of_month)
 
     @calendar_days = build_calendar_days
-    @slots = @service && @date ? SlotFinder.new(clinic: @clinic, service: @service, date: @date, exclude_appointment_id: @editing_appointment&.id).slots : []
+    @slots = @service && @date ? SlotFinder.new(clinic: @clinic, service: @service, date: @date,
+      staff: selected_staff, exclude_appointment_id: @editing_appointment&.id).slots : []
+  end
+
+  # The specific doctor the patient picked, if any — nil means "Anyone",
+  # which SlotFinder treats as clinic-wide hours (per-staff scheduling has no
+  # single doctor to check yet at this point in the wizard).
+  def selected_staff
+    return @selected_staff if defined?(@selected_staff)
+    @selected_staff = @staff_id.present? ? @clinic.staff_members.find_by(id: @staff_id) : nil
   end
 
   def default_edit_date
@@ -54,7 +63,8 @@ class BookingsController < ApplicationController
 
     (@month..@month.end_of_month).map do |day|
       available = day >= Date.current &&
-        SlotFinder.new(clinic: @clinic, service: @service, date: day, exclude_appointment_id: @editing_appointment&.id).slots.any?(&:available)
+        SlotFinder.new(clinic: @clinic, service: @service, date: day, staff: selected_staff,
+          exclude_appointment_id: @editing_appointment&.id).slots.any?(&:available)
       { date: day, available: available }
     end
   end

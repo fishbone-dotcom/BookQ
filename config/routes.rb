@@ -27,7 +27,9 @@ Rails.application.routes.draw do
       end
     end
     resource :calendar, only: [ :show ]
-    resources :doctors, only: [ :index, :new, :create ]
+    resources :doctors, only: [ :index, :new, :create ] do
+      resource :unavailability, only: [ :new, :create ], controller: "doctor_unavailabilities"
+    end
     resources :patients, only: [ :index, :show, :edit, :update ]
 
     get "reports", to: "reports#index", as: :reports

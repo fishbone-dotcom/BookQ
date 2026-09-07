@@ -84,7 +84,7 @@ module Staff
       @staff_id = params.key?(:staff_id) ? params[:staff_id].presence : nil
       @date = parse_date(params[:date])
 
-      @slots = @service && @date ? SlotFinder.new(clinic: @clinic, service: @service, date: @date).slots : []
+      @slots = @service && @date ? SlotFinder.new(clinic: @clinic, service: @service, date: @date, staff: selected_staff).slots : []
     end
 
     def load_edit_context(appointment)
@@ -95,7 +95,13 @@ module Staff
       @staff_id = params.key?(:staff_id) ? params[:staff_id].presence : appointment.staff_id&.to_s
       @date = parse_date(params[:date]) || appointment.starts_at.to_date
 
-      @slots = @service && @date ? SlotFinder.new(clinic: @clinic, service: @service, date: @date, exclude_appointment_id: appointment.id).slots : []
+      @slots = @service && @date ? SlotFinder.new(clinic: @clinic, service: @service, date: @date,
+        staff: selected_staff, exclude_appointment_id: appointment.id).slots : []
+    end
+
+    # The specific doctor selected in the form, if any — nil means "Anyone."
+    def selected_staff
+      @staff_id.present? ? @clinic.staff_members.find_by(id: @staff_id) : nil
     end
 
     def filter_by_status(scope)

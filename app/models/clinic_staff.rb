@@ -2,6 +2,8 @@ class ClinicStaff < ApplicationRecord
   belongs_to :clinic
   belongs_to :user
 
+  has_many :availabilities, dependent: :destroy
+
   enum :role, { staff: 0, owner: 1 }
   enum :status, { available: 0, on_leave: 1 }
 

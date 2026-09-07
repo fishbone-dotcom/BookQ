@@ -1,7 +1,25 @@
 <% content_for(:page_title, "Working Hours") %>
 <% content_for(:back_path, staff_settings_path) %>
 
-<%= form_with url: staff_availabilities_path, method: :patch, class: "flex flex-col gap-3" do %>
+<% if @clinic_staffs.any? %>
+  <div class="flex gap-2 overflow-x-auto pb-1 mb-4 -mx-1 px-1">
+    <%= link_to "Clinic Default Hours", staff_availabilities_path,
+          class: "shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition #{@selected_clinic_staff.nil? ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}" %>
+    <% @clinic_staffs.each do |clinic_staff| %>
+      <%= link_to clinic_staff.user.display_name, staff_availabilities_path(clinic_staff_id: clinic_staff.id),
+            class: "shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition #{@selected_clinic_staff == clinic_staff ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}" %>
+    <% end %>
+  </div>
+  <p class="text-xs text-gray-500 mb-4">
+    <% if @selected_clinic_staff %>
+      Setting hours just for <%= @selected_clinic_staff.user.display_name %> — falls back to Clinic Default Hours on days left closed.
+    <% else %>
+      Doctors without their own hours use these.
+    <% end %>
+  </p>
+<% end %>
+
+<%= form_with url: staff_availabilities_path(clinic_staff_id: @selected_clinic_staff&.id), method: :patch, class: "flex flex-col gap-3" do %>
   <% @availabilities.each do |day, availability| %>
     <div class="bg-white border border-gray-200 rounded-xl p-3 shadow-sm">
       <label class="flex items-center justify-between gap-3 mb-2 cursor-pointer">

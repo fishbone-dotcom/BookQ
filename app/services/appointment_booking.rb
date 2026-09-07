@@ -9,12 +9,14 @@ class AppointmentBooking
   def create_for(patient)
     return failure("Please select a time first.") if starts_at.blank?
     return failure("You already have an active booking. Only one active booking is allowed per patient.") if patient.patient_appointments.active.exists?
+    return failure("No doctor is available at that time — please pick a different one.") if anyone_unavailable?
 
     save(patient.patient_appointments.build(attributes))
   end
 
   def reschedule(appointment)
     return failure("Please select a time first.") if starts_at.blank?
+    return failure("No doctor is available at that time — please pick a different one.") if anyone_unavailable?
 
     appointment.assign_attributes(attributes)
     save(appointment)
@@ -45,7 +47,38 @@ class AppointmentBooking
 
   def staff
     return @staff if defined?(@staff)
-    @staff = params[:staff_id].present? ? clinic.staff_members.find(params[:staff_id]) : nil
+    @staff = if params[:staff_id].present?
+      clinic.staff_members.find(params[:staff_id])
+    elsif per_staff_scheduling_enabled?
+      auto_assigned_staff
+    end
+  end
+
+  # Auto-assignment only kicks in for clinics that have actually configured
+  # at least one per-staff schedule — otherwise "Anyone" keeps meaning
+  # exactly what it always has (staff_id: nil), unchanged.
+  def per_staff_scheduling_enabled?
+    clinic.availabilities.where.not(clinic_staff_id: nil).exists?
+  end
+
+  # Distinguishes "Anyone, and this clinic hasn't opted into per-staff
+  # scheduling" (staff stays nil, booking proceeds as always) from "Anyone,
+  # opted in, but genuinely nobody is free at that time" (should fail rather
+  # than silently book with no doctor assigned).
+  def anyone_unavailable?
+    params[:staff_id].blank? && per_staff_scheduling_enabled? && staff.nil?
+  end
+
+  def auto_assigned_staff
+    return nil if starts_at.blank?
+
+    finder = SlotFinder.new(clinic: clinic, service: service, date: starts_at.to_date)
+    candidates = finder.available_staff_for(starts_at, starts_at + service.duration_minutes.minutes)
+    candidates.min_by { |cs| [ appointment_count_for(cs), cs.id ] }&.user
+  end
+
+  def appointment_count_for(clinic_staff)
+    clinic.appointments.active.where(staff_id: clinic_staff.user_id, starts_at: starts_at.to_date.all_day).count
   end
 
   def starts_at

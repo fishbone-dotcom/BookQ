@@ -11,7 +11,8 @@ const ALL_CIRCLE_CLASSES = Object.values(CIRCLE_CLASSES).flat()
 
 export default class extends Controller {
   static targets = [
-    "stepPanel", "stepIndicator", "progressLine", "serviceForm", "bookingForm", "hiddenDate", "dateCell",
+    "stepPanel", "stepIndicator", "progressLine", "serviceForm", "staffForm", "staffFormStaffId",
+    "bookingForm", "hiddenDate", "dateCell",
     "backButton", "nextButton", "submitButton",
     "summaryStaff", "summaryDate", "summaryTime",
     "summaryStaffPrevious", "summaryDatePrevious", "summaryTimePrevious"
@@ -72,6 +73,14 @@ export default class extends Controller {
   next() {
     if (this.stepValue === 1) {
       this.serviceFormTarget.requestSubmit()
+      return
+    }
+    if (this.stepValue === 2) {
+      // The doctor choice needs a real reload — the server has to know which
+      // doctor was picked before it can compute that doctor's own slots.
+      const staffChecked = this.bookingFormTarget.querySelector('input[name="staff_id"]:checked')
+      this.staffFormStaffIdTarget.value = staffChecked?.value || ""
+      this.staffFormTarget.requestSubmit()
       return
     }
     this.stepValue = Math.min(4, this.stepValue + 1)
@@ -169,12 +178,14 @@ export default class extends Controller {
   }
 
   restoreState() {
-    // Only intervene when the server hasn't already placed us on step 3+ —
-    // step 1's own selection is a real GET submit that puts service_id in
-    // the URL, so a refresh after that legitimately computes step 2, not 1.
-    // But step 3 (a date) or step 4 (an editing_appointment) came from real
-    // server-side state we shouldn't override with stale client storage.
-    if (this.stepValue > 2) return
+    // Only intervene when the server hasn't already resolved a real date —
+    // step 3 can be reached either because a date is genuinely set
+    // server-side (an editing_appointment's date, or a date query param —
+    // real state we shouldn't override) or just because the doctor step was
+    // submitted (no date resolved yet, the case this restore is actually
+    // for). Check the hidden date field itself rather than the step number,
+    // since both cases render step 3.
+    if (this.hiddenDateTarget.value) return
 
     let saved
     try {
@@ -196,10 +207,11 @@ export default class extends Controller {
         // the slots for that date get freshly fetched rather than guessed at.
         cell.click()
         this.stepValue = 3
-        return
       }
     }
-
-    if (saved.step > 1) this.stepValue = Math.min(saved.step, 2)
+    // No further fallback beyond this — the server-computed stepValue this
+    // connect() already fired with (from the URL's own service_id/staff_step)
+    // is authoritative. Re-applying saved.step here would risk dragging a
+    // freshly-advanced step backward with stale progress from an earlier page.
   }
 }
