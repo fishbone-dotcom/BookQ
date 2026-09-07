@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+/* Turbo sets [busy] on a turbo-frame while it's fetching new content — give
+   the booking wizard's slot picker a visible loading state instead of
+   appearing to do nothing between clicking a date and slots showing up. */
+turbo-frame#slots[busy] {
+  opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 0.15s ease-in;
+}

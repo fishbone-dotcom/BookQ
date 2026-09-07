@@ -52,7 +52,7 @@
       <div data-booking-wizard-target="stepPanel" data-step="1">
         <%= form_with url: clinic_booking_path(@clinic), method: :get, data: { "booking-wizard-target": "serviceForm" }, class: "flex flex-col gap-2" do |f| %>
           <% @services.each do |service| %>
-            <label class="group relative flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 cursor-pointer shadow-sm has-checked:border-emerald-600 has-checked:bg-emerald-50 transition">
+            <label class="group relative flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 cursor-pointer shadow-sm has-checked:border-emerald-600 has-checked:bg-emerald-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 transition">
               <input type="radio" name="service_id" value="<%= service.id %>" class="sr-only" <%= "checked" if service == @service %>>
               <span class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-none group-has-checked:bg-emerald-600 group-has-checked:text-white transition">
                 <%= render "icons/pill", size: 18 %>
@@ -80,7 +80,7 @@
 
         <!-- Step 2: Doctor (client-side only — availability isn't per-doctor yet) -->
         <div data-booking-wizard-target="stepPanel" data-step="2" class="flex flex-col gap-2">
-          <label class="group relative flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 cursor-pointer shadow-sm has-checked:border-emerald-600 has-checked:bg-emerald-50 transition">
+          <label class="group relative flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 cursor-pointer shadow-sm has-checked:border-emerald-600 has-checked:bg-emerald-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 transition">
             <input type="radio" name="staff_id" value="" class="sr-only" data-name="Anyone" <%= "checked" if @staff_id.blank? %>>
             <span class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 flex-none">
               <%= render "icons/users", size: 18 %>
@@ -90,7 +90,7 @@
           </label>
           <% @clinic_staffs.each do |clinic_staff| %>
             <% staff = clinic_staff.user %>
-            <label class="group relative flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 cursor-pointer shadow-sm has-checked:border-emerald-600 has-checked:bg-emerald-50 transition">
+            <label class="group relative flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 cursor-pointer shadow-sm has-checked:border-emerald-600 has-checked:bg-emerald-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 transition">
               <input type="radio" name="staff_id" value="<%= staff.id %>" class="sr-only" data-name="<%= staff.display_name %>" <%= "checked" if @staff_id == staff.id.to_s %>>
               <span class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm font-semibold flex-none"><%= staff.display_name.first.upcase %></span>
               <span class="flex-1">
@@ -150,7 +150,7 @@
               <% else %>
                 <div class="grid grid-cols-3 gap-2">
                   <% available_slots.each do |label, value| %>
-                    <label class="relative flex items-center justify-center border border-gray-200 rounded-xl py-2.5 text-sm font-medium text-gray-700 cursor-pointer shadow-sm has-checked:border-emerald-600 has-checked:bg-emerald-600 has-checked:text-white transition">
+                    <label class="relative flex items-center justify-center border border-gray-200 rounded-xl py-2.5 text-sm font-medium text-gray-700 cursor-pointer shadow-sm has-checked:border-emerald-600 has-checked:bg-emerald-600 has-checked:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 transition">
                       <input type="radio" name="starts_at" value="<%= value %>" class="sr-only" data-action="change->booking-wizard#slotChanged" data-label="<%= label %>"
                         <%= "checked" if @editing_appointment && value == @editing_appointment.starts_at.iso8601 %>>
                       <%= label %>
