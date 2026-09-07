@@ -55,6 +55,11 @@ env:
     # Log everything from Rails
     # RAILS_LOG_LEVEL: debug
 
+# How many old containers/images to keep around for rollback. Defaults to 5,
+# which fills up the 8GB EC2 root volume within a handful of deploys (each
+# image is ~580MB) — keep just enough for one rollback.
+retain_containers: 2
+
 # Aliases are triggered with "bin/kamal <alias>". You can overwrite arguments on invocation:
 # "bin/kamal logs -r job" will tail logs from the first server in the job section.
 aliases:
