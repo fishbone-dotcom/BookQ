@@ -3,6 +3,13 @@ require "rails_helper"
 RSpec.describe "Staff::DoctorUnavailabilities new/create", type: :request do
   include ActiveJob::TestHelper
 
+  # Fixed to a mid-morning moment so `2.hours.from_now` (used below) can
+  # never cross midnight into the next calendar day — without this, the
+  # suite is flaky whenever it happens to run late at night.
+  around do |example|
+    travel_to(Time.zone.local(2026, 1, 6, 9, 0, 0)) { example.run }
+  end
+
   let(:clinic) { create(:clinic) }
   let(:doctor_user) { create(:user, name: "Dr. Reyes") }
   let(:doctor) { create(:clinic_staff, clinic: clinic, user: doctor_user) }
