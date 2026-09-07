@@ -25,13 +25,13 @@ Rails.application.configure do
   config.active_storage.service = :local
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
-  # config.assume_ssl = true
+  config.assume_ssl = true
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  # config.force_ssl = true
+  config.force_ssl = true
 
   # Skip http-to-https redirect for the default health check endpoint.
-  # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
+  config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
 
   # Log to STDOUT with the current request id as a default log tag.
   config.log_tags = [ :request_id ]
@@ -57,10 +57,7 @@ Rails.application.configure do
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   config.action_mailer.raise_delivery_errors = true
 
-  # No domain yet — running off the raw EC2 IP, no HTTPS. Switch this (and
-  # config.force_ssl / config.assume_ssl below) to a real domain once one is
-  # pointed at the server.
-  config.action_mailer.default_url_options = { host: "98.84.178.27" }
+  config.action_mailer.default_url_options = { host: "boookq.duckdns.org", protocol: "https" }
 
   # Specify outgoing SMTP server. Remember to add smtp/* credentials via bin/rails credentials:edit.
   config.action_mailer.smtp_settings = {
@@ -83,7 +80,7 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [ :id ]
 
   # Enable DNS rebinding protection and other `Host` header attacks.
-  # No domain yet, so allow the raw EC2 IP — add the domain here once one exists.
+  config.hosts << "boookq.duckdns.org"
   config.hosts << "98.84.178.27"
 
   # Skip DNS rebinding protection for the default health check endpoint.
