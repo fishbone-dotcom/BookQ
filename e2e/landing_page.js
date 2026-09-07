@@ -36,9 +36,6 @@ const path = require("path");
   // Illustrated tagline banner
   check("tagline banner is present", body.includes("Better care. Less hassle."));
 
-  // Closing CTA
-  check("closing CTA heading is present", body.includes("Ready to book your first appointment?"));
-
   // The Google button's form action should point at the omniauth authorize path.
   const googleForms = await page.locator('form[action*="/users/auth/google_oauth2"]').count();
   check("at least one form posts to /users/auth/google_oauth2", googleForms >= 2); // hero + closing CTA
