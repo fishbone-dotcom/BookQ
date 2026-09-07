@@ -10,7 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_07_104934) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_07_130354) do
+  create_table "appointment_audits", force: :cascade do |t|
+    t.integer "action", null: false
+    t.integer "actor_id"
+    t.integer "appointment_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "previous_starts_at"
+    t.string "reason"
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_appointment_audits_on_actor_id"
+    t.index ["appointment_id"], name: "index_appointment_audits_on_appointment_id"
+  end
+
   create_table "appointments", force: :cascade do |t|
     t.integer "clinic_id", null: false
     t.datetime "created_at", null: false
@@ -108,6 +120,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_104934) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "appointment_audits", "appointments"
+  add_foreign_key "appointment_audits", "users", column: "actor_id"
   add_foreign_key "appointments", "clinics"
   add_foreign_key "appointments", "services"
   add_foreign_key "appointments", "users", column: "patient_id"

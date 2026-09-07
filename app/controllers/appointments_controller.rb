@@ -3,7 +3,7 @@ class AppointmentsController < ApplicationController
 
   def update
     appointment = current_user.patient_appointments.find(params[:id])
-    result = AppointmentBooking.new(clinic: appointment.clinic, params: params).reschedule(appointment)
+    result = AppointmentBooking.new(clinic: appointment.clinic, params: params, actor: current_user).reschedule(appointment)
 
     if result.success?
       redirect_to root_path, notice: "Your appointment has been updated."
@@ -17,7 +17,7 @@ class AppointmentsController < ApplicationController
     appointment = current_user.patient_appointments.find(params[:id])
 
     if appointment.active?
-      appointment.cancel!
+      appointment.cancel!(by: current_user)
       redirect_to root_path, notice: "Your booking has been cancelled."
     else
       redirect_to clinic_booking_path(appointment.clinic, service_id: appointment.service_id), alert: "This booking can no longer be cancelled."

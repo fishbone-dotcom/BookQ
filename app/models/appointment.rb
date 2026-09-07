@@ -4,6 +4,12 @@ class Appointment < ApplicationRecord
   belongs_to :service
   belongs_to :staff, class_name: "User", optional: true, inverse_of: :staff_appointments
 
+  has_many :audits, class_name: "AppointmentAudit", dependent: :destroy
+
+  # Transient — set by a caller right before save/update! so the audit
+  # callbacks below know who's acting and (optionally) why. Not persisted.
+  attr_accessor :audit_actor, :audit_reason
+
   enum :status, { pending: 0, confirmed: 1, cancelled: 2, completed: 3 }
 
   scope :active, -> { where(status: [ :pending, :confirmed ]) }
@@ -14,15 +20,36 @@ class Appointment < ApplicationRecord
   validate :no_overlapping_appointments
   validate :patient_has_no_other_active_appointment
 
+  after_create :record_creation_audit
+  after_update :record_change_audit, if: :saved_change_to_status_or_schedule?
+
   def active?
     pending? || confirmed?
   end
 
-  def cancel!
-    update!(status: :cancelled) if active?
+  def cancel!(by:, reason: nil)
+    return unless active?
+
+    self.audit_actor = by
+    self.audit_reason = reason
+    update!(status: :cancelled)
   end
 
   private
+
+  def record_creation_audit
+    audits.create!(action: :created, actor: audit_actor, reason: audit_reason)
+  end
+
+  def record_change_audit
+    action = saved_change_to_status? && cancelled? ? :cancelled : :rescheduled
+    audits.create!(action: action, actor: audit_actor, reason: audit_reason,
+      previous_starts_at: saved_change_to_starts_at? ? starts_at_before_last_save : nil)
+  end
+
+  def saved_change_to_status_or_schedule?
+    saved_change_to_status? || saved_change_to_starts_at? || saved_change_to_staff_id?
+  end
 
   def ends_at_after_starts_at
     return if starts_at.blank? || ends_at.blank?

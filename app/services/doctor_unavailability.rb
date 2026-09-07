@@ -1,17 +1,18 @@
 class DoctorUnavailability
   Result = Struct.new(:cancelled_count, keyword_init: true)
 
-  def initialize(clinic:, clinic_staff:, from_date:, to_date:)
+  def initialize(clinic:, clinic_staff:, from_date:, to_date:, triggered_by:)
     @clinic = clinic
     @clinic_staff = clinic_staff
     @from_date = from_date
     @to_date = to_date
+    @triggered_by = triggered_by
   end
 
   def apply!
     count = 0
     affected_appointments.find_each do |appointment|
-      appointment.cancel!
+      appointment.cancel!(by: triggered_by, reason: "#{clinic_staff.user.display_name} was marked unavailable")
       AppointmentMailer.staff_unavailable(appointment).deliver_later
       count += 1
     end
@@ -20,7 +21,7 @@ class DoctorUnavailability
 
   private
 
-  attr_reader :clinic, :clinic_staff, :from_date, :to_date
+  attr_reader :clinic, :clinic_staff, :from_date, :to_date, :triggered_by
 
   def affected_appointments
     clinic.appointments.active

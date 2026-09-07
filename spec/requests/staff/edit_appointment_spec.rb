@@ -52,6 +52,37 @@ RSpec.describe "Staff::Appointments edit/update/cancel", type: :request do
       expect(response.body).to include("can no longer be edited")
       expect(response.body).not_to include("Save Changes")
     end
+
+    it "shows a History section with past audit entries, including for a cancelled appointment" do
+      staffer = create(:user, name: "Staffer One")
+      clinic = create(:clinic)
+      create(:clinic_staff, clinic: clinic, user: staffer)
+      appointment = create(:appointment, clinic: clinic)
+      appointment.cancel!(by: staffer, reason: "Patient requested")
+
+      sign_in staffer
+      get edit_staff_appointment_path(appointment)
+
+      expect(response.body).to include("History")
+      expect(response.body).to include("Cancelled")
+      expect(response.body).to include("Staffer One")
+      expect(response.body).to include("Patient requested")
+    end
+
+    it "does not show a History section when there's nothing to show" do
+      # Not reachable in practice (every appointment gets a "created" audit
+      # on save), but confirms the section doesn't render an empty shell.
+      staffer = create(:user)
+      clinic = create(:clinic)
+      create(:clinic_staff, clinic: clinic, user: staffer)
+      appointment = create(:appointment, clinic: clinic)
+      appointment.audits.delete_all
+
+      sign_in staffer
+      get edit_staff_appointment_path(appointment)
+
+      expect(response.body).not_to include("History")
+    end
   end
 
   describe "PATCH /staff/appointments/:id" do

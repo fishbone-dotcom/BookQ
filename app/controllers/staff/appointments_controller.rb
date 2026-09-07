@@ -20,7 +20,7 @@ module Staff
       patient = patient_scope.find_by(id: params[:patient_id])
       return redirect_to_new(alert: "Please select a patient.") if patient.nil?
 
-      result = AppointmentBooking.new(clinic: @clinic, params: params).create_for(patient)
+      result = AppointmentBooking.new(clinic: @clinic, params: params, actor: current_user).create_for(patient)
 
       if result.success?
         redirect_to staff_appointments_path(date: result.appointment.starts_at.to_date.iso8601),
@@ -31,13 +31,13 @@ module Staff
     end
 
     def edit
-      @appointment = @clinic.appointments.find(params[:id])
+      @appointment = @clinic.appointments.includes(audits: :actor).find(params[:id])
       load_edit_context(@appointment)
     end
 
     def update
       @appointment = @clinic.appointments.find(params[:id])
-      result = AppointmentBooking.new(clinic: @clinic, params: params).reschedule(@appointment)
+      result = AppointmentBooking.new(clinic: @clinic, params: params, actor: current_user).reschedule(@appointment)
 
       if result.success?
         redirect_to staff_appointments_path(date: result.appointment.starts_at.to_date.iso8601),
@@ -51,7 +51,7 @@ module Staff
       appointment = @clinic.appointments.find(params[:id])
 
       if appointment.active?
-        appointment.cancel!
+        appointment.cancel!(by: current_user)
         redirect_to staff_appointments_path(date: appointment.starts_at.to_date.iso8601), notice: "Appointment cancelled."
       else
         redirect_to staff_appointments_path(date: appointment.starts_at.to_date.iso8601), alert: "This appointment can no longer be cancelled."

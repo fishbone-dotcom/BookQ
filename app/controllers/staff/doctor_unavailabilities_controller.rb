@@ -10,7 +10,7 @@ module Staff
       to_date = parse_date(params[:to_date]) || from_date
 
       result = DoctorUnavailability.new(
-        clinic: @clinic, clinic_staff: @doctor, from_date: from_date, to_date: to_date
+        clinic: @clinic, clinic_staff: @doctor, from_date: from_date, to_date: to_date, triggered_by: current_user
       ).apply!
 
       redirect_to staff_doctors_path, notice: notice_for(result)

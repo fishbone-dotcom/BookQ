@@ -17,6 +17,7 @@ RSpec.describe AppointmentBooking, type: :model do
   let(:service) { create(:service, clinic: clinic, duration_minutes: 30) }
 
   after do
+    AppointmentAudit.delete_all
     Appointment.delete_all
     Availability.delete_all
     Service.delete_all
@@ -56,7 +57,7 @@ RSpec.describe AppointmentBooking, type: :model do
         result = AppointmentBooking.new(clinic: booking_clinic, params: {
           service_id: booking_service.id,
           starts_at: starts_at.iso8601
-        }).create_for(patient)
+        }, actor: patient).create_for(patient)
 
         writer.write(result.success? ? "1" : "0")
         writer.close
@@ -83,6 +84,39 @@ RSpec.describe AppointmentBooking, type: :model do
 
   # Back to normal per-example transactions for everything below — only the
   # fork-based concurrency test above needs real cross-process commits.
+  describe "audit trail" do
+    self.use_transactional_tests = true
+
+    it "records a created audit with the given actor on create_for" do
+      patient = create(:user)
+
+      result = AppointmentBooking.new(clinic: clinic, params: {
+        service_id: service.id, starts_at: 1.day.from_now.change(hour: 10, min: 0).iso8601
+      }, actor: patient).create_for(patient)
+
+      audit = result.appointment.audits.last
+      expect(audit.action).to eq("created")
+      expect(audit.actor).to eq(patient)
+    end
+
+    it "records a rescheduled audit with the previous start time, actor as given" do
+      staffer = create(:user)
+      appointment = create(:appointment, clinic: clinic, service: service,
+        starts_at: 1.day.from_now.change(hour: 10, min: 0), ends_at: 1.day.from_now.change(hour: 10, min: 30))
+      old_starts_at = appointment.starts_at
+      new_starts_at = 2.days.from_now.change(hour: 11, min: 0)
+
+      AppointmentBooking.new(clinic: clinic, params: {
+        service_id: service.id, starts_at: new_starts_at.iso8601
+      }, actor: staffer).reschedule(appointment)
+
+      audit = appointment.audits.order(:created_at).last
+      expect(audit.action).to eq("rescheduled")
+      expect(audit.actor).to eq(staffer)
+      expect(audit.previous_starts_at).to eq(old_starts_at)
+    end
+  end
+
   describe "auto-assigning a doctor for 'Anyone' bookings" do
     self.use_transactional_tests = true
 
@@ -92,7 +126,7 @@ RSpec.describe AppointmentBooking, type: :model do
     def book_anyone(patient, starts_at: self.starts_at)
       AppointmentBooking.new(clinic: clinic, params: {
         service_id: service.id, starts_at: starts_at.iso8601
-      }).create_for(patient)
+      }, actor: patient).create_for(patient)
     end
 
     context "when the clinic has not configured any per-staff hours" do

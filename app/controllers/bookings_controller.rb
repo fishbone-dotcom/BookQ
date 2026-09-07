@@ -7,7 +7,7 @@ class BookingsController < ApplicationController
   end
 
   def create
-    result = AppointmentBooking.new(clinic: @clinic, params: params).create_for(current_user)
+    result = AppointmentBooking.new(clinic: @clinic, params: params, actor: current_user).create_for(current_user)
 
     if result.success?
       redirect_to root_path, notice: "Your appointment is booked for #{I18n.l(result.appointment.starts_at, format: :long)}."

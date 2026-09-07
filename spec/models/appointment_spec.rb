@@ -126,15 +126,17 @@ RSpec.describe Appointment, type: :model do
   end
 
   describe "#cancel!" do
+    let(:staffer) { create(:user) }
+
     it "sets an active appointment's status to cancelled" do
       appointment = create(:appointment, clinic: clinic, service: service, status: :pending)
-      appointment.cancel!
+      appointment.cancel!(by: staffer)
       expect(appointment.reload.status).to eq("cancelled")
     end
 
     it "leaves an already-completed appointment unchanged" do
       appointment = create(:appointment, clinic: clinic, service: service, status: :completed)
-      appointment.cancel!
+      appointment.cancel!(by: staffer)
       expect(appointment.reload.status).to eq("completed")
     end
 
@@ -150,9 +152,61 @@ RSpec.describe Appointment, type: :model do
         starts_at: 2.days.from_now.change(hour: 14, min: 0), ends_at: 2.days.from_now.change(hour: 14, min: 15))
         .save!(validate: false)
 
-      first.cancel!
+      first.cancel!(by: staffer)
 
       expect(first.reload.status).to eq("cancelled")
+    end
+
+    it "records a cancelled audit with the given actor and reason" do
+      appointment = create(:appointment, clinic: clinic, service: service, status: :pending)
+
+      appointment.cancel!(by: staffer, reason: "Doctor unavailable")
+
+      audit = appointment.audits.last
+      expect(audit.action).to eq("cancelled")
+      expect(audit.actor).to eq(staffer)
+      expect(audit.reason).to eq("Doctor unavailable")
+    end
+
+    it "records no audit when cancelling an already-inactive appointment (no-op)" do
+      appointment = create(:appointment, clinic: clinic, service: service, status: :completed)
+
+      expect { appointment.cancel!(by: staffer) }.not_to change { appointment.audits.count }
+    end
+  end
+
+  describe "audit trail" do
+    it "records a created audit when audit_actor is set before save" do
+      patient = create(:user)
+      appointment = build(:appointment, patient: patient, clinic: clinic, service: service)
+      appointment.audit_actor = patient
+
+      appointment.save!
+
+      audit = appointment.audits.last
+      expect(audit.action).to eq("created")
+      expect(audit.actor).to eq(patient)
+    end
+
+    it "records a rescheduled audit with the previous start time when starts_at changes" do
+      appointment = create(:appointment, clinic: clinic, service: service,
+        starts_at: 1.day.from_now.change(hour: 10, min: 0), ends_at: 1.day.from_now.change(hour: 10, min: 30))
+      old_starts_at = appointment.starts_at
+      staffer = create(:user)
+
+      appointment.audit_actor = staffer
+      appointment.update!(starts_at: 2.days.from_now.change(hour: 11, min: 0), ends_at: 2.days.from_now.change(hour: 11, min: 30))
+
+      audit = appointment.audits.order(:created_at).last
+      expect(audit.action).to eq("rescheduled")
+      expect(audit.actor).to eq(staffer)
+      expect(audit.previous_starts_at).to eq(old_starts_at)
+    end
+
+    it "does not record an audit for a notes-only update" do
+      appointment = create(:appointment, clinic: clinic, service: service)
+
+      expect { appointment.update!(notes: "left a note") }.not_to change { appointment.audits.count }
     end
   end
 end

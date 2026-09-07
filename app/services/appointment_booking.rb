@@ -1,9 +1,10 @@
 class AppointmentBooking
   Result = Struct.new(:appointment, :success?, :error, keyword_init: true)
 
-  def initialize(clinic:, params:)
+  def initialize(clinic:, params:, actor:)
     @clinic = clinic
     @params = params
+    @actor = actor
   end
 
   def create_for(patient)
@@ -24,7 +25,7 @@ class AppointmentBooking
 
   private
 
-  attr_reader :clinic, :params
+  attr_reader :clinic, :params, :actor
 
   def attributes
     attrs = {
@@ -89,6 +90,7 @@ class AppointmentBooking
   end
 
   def save(appointment)
+    appointment.audit_actor = actor
     if appointment.save
       Result.new(appointment: appointment, success?: true)
     else

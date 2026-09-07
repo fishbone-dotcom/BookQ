@@ -13,8 +13,9 @@ RSpec.describe DoctorUnavailability, type: :model do
       starts_at: starts_at, ends_at: starts_at + 30.minutes, status: status)
   end
 
-  def apply(from_date: Date.current, to_date: Date.current)
-    described_class.new(clinic: clinic, clinic_staff: clinic_staff, from_date: from_date, to_date: to_date).apply!
+  def apply(from_date: Date.current, to_date: Date.current, triggered_by: create(:user))
+    described_class.new(clinic: clinic, clinic_staff: clinic_staff, from_date: from_date, to_date: to_date,
+      triggered_by: triggered_by).apply!
   end
 
   it "cancels the doctor's active future appointments within the date range and notifies each patient" do
@@ -77,5 +78,17 @@ RSpec.describe DoctorUnavailability, type: :model do
     result = apply
 
     expect(result.cancelled_count).to eq(0)
+  end
+
+  it "records a cancelled audit with the triggering staff member as actor and a reason naming the doctor" do
+    affected = build_appointment(starts_at: 2.hours.from_now)
+    staffer = create(:user)
+
+    apply(triggered_by: staffer)
+
+    audit = affected.audits.last
+    expect(audit.action).to eq("cancelled")
+    expect(audit.actor).to eq(staffer)
+    expect(audit.reason).to include("Dr. Reyes")
   end
 end
