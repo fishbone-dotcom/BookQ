@@ -35,6 +35,17 @@ rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
 RSpec.configure do |config|
+  # Rails draws routes lazily on the first request in dev/test (only
+  # `eager_load: true`, as in production, forces it at boot). Devise's
+  # OmniAuth path prefix ("/users/auth") gets set as a side effect of that
+  # draw (see devise/rails/routes.rb#set_omniauth_path_prefix!) — if the
+  # very first request in the suite happens to be an OmniAuth request, the
+  # OmniAuth::Builder middleware reads a still-nil path prefix, silently
+  # fails to recognize its own callback path, and falls through to plain
+  # Rails routing with no `omniauth.auth` set. Force the draw before any
+  # example runs so route-dependent config like this is never order-dependent.
+  config.before(:suite) { Rails.application.reload_routes! }
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')

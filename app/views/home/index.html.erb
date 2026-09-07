@@ -97,14 +97,80 @@
     </div>
   </div>
 <% else %>
-  <div class="w-full max-w-sm mx-auto text-center">
-    <h1 class="font-bold text-3xl text-gray-900 mb-2">BookQ</h1>
-    <p class="text-gray-500 text-sm mb-6">Clinic booking, no more Messenger back-and-forth.</p>
+  <div class="w-full max-w-5xl mx-auto flex flex-col gap-16 lg:gap-24 pb-16">
+    <%# Hero %>
+    <div class="text-center pt-4 lg:pt-10">
+      <p class="font-bold text-lg text-emerald-700 mb-4">BookQ</p>
+      <h1 class="font-bold text-3xl lg:text-5xl text-gray-900 mb-4 max-w-2xl mx-auto leading-tight">
+        Clinic booking, without the Messenger back-and-forth
+      </h1>
+      <p class="text-gray-500 text-sm lg:text-lg mb-8 max-w-md lg:max-w-xl mx-auto">
+        BookQ lets patients see real-time open slots and book instantly — no more waiting for a reply to "kailan available?"
+      </p>
 
-    <p class="mb-6 text-gray-500 text-sm">You're not logged in yet.</p>
-    <div class="flex flex-col gap-3">
-      <%= link_to "Sign up", new_user_registration_path, class: "bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg transition" %>
-      <%= link_to "Log in", new_user_session_path, class: "bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 rounded-lg transition" %>
+      <div class="flex flex-col items-center gap-3 max-w-xs mx-auto">
+        <%= button_to omniauth_authorize_path(:user, :google_oauth2), data: { turbo: false },
+              class: "w-full flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-lg shadow-sm transition" do %>
+          <%= render "icons/google" %>
+          Continue with Google
+        <% end %>
+        <%= link_to "Sign up with email", new_user_registration_path, class: "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition" %>
+        <%= link_to "Log in", new_user_session_path, class: "text-sm text-gray-500 hover:text-gray-700 mt-1" %>
+      </div>
+    </div>
+
+    <%# Features %>
+    <div>
+      <h2 class="text-center font-bold text-2xl text-gray-900 mb-8 lg:mb-10">Everything a clinic needs to manage bookings</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <% [
+             [ "calendar", "Real-time availability", "See each doctor's open hours and book a slot instantly — no waiting for a reply." ],
+             [ "bell", "Automatic confirmations", "Patients get an email confirmation the moment a booking goes through." ],
+             [ "clock", "No double-booking", "Every slot is checked against the doctor's schedule before it's confirmed." ],
+             [ "building", "Multiple clinics", "Book across any clinic on BookQ from a single account." ]
+           ].each do |icon, title, desc| %>
+          <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <span class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+              <%= render "icons/#{icon}", size: 18 %>
+            </span>
+            <h3 class="font-semibold text-gray-900 text-sm mb-1"><%= title %></h3>
+            <p class="text-gray-500 text-xs leading-relaxed"><%= desc %></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <%# How it works %>
+    <div>
+      <h2 class="text-center font-bold text-2xl text-gray-900 mb-8 lg:mb-10">How it works</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 lg:gap-10 max-w-3xl mx-auto">
+        <% [
+             [ "1", "Find a clinic", "Search for the clinic you want to book with." ],
+             [ "2", "Pick a time", "Choose a service, an optional doctor, and an open slot." ],
+             [ "3", "Get confirmed", "Your appointment is booked instantly — no waiting on a reply." ]
+           ].each do |step, title, desc| %>
+          <div class="text-center">
+            <span class="w-9 h-9 rounded-full bg-emerald-600 text-white font-semibold text-sm flex items-center justify-center mx-auto mb-3"><%= step %></span>
+            <h3 class="font-semibold text-gray-900 text-sm mb-1"><%= title %></h3>
+            <p class="text-gray-500 text-xs leading-relaxed"><%= desc %></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Closing CTA %>
+    <div class="bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-2xl px-6 py-10 lg:py-14 text-center text-white shadow-sm">
+      <h2 class="font-bold text-2xl lg:text-3xl mb-2">Ready to book your first appointment?</h2>
+      <p class="text-emerald-100 text-sm lg:text-base mb-8">It only takes a minute to get started.</p>
+      <div class="flex flex-col items-center gap-3 max-w-xs mx-auto">
+        <%= button_to omniauth_authorize_path(:user, :google_oauth2), data: { turbo: false },
+              class: "w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-lg transition" do %>
+          <%= render "icons/google" %>
+          Continue with Google
+        <% end %>
+        <%= link_to "Sign up with email", new_user_registration_path, class: "w-full bg-emerald-900/40 hover:bg-emerald-900/60 text-white font-medium py-2.5 rounded-lg transition border border-white/20" %>
+        <%= link_to "Log in", new_user_session_path, class: "text-sm text-emerald-100 hover:text-white mt-1" %>
+      </div>
     </div>
   </div>
 <% end %>

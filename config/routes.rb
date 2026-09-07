@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  devise_for :users, controllers: { registrations: "users/registrations" }
+  devise_for :users, controllers: { registrations: "users/registrations", omniauth_callbacks: "users/omniauth_callbacks" }
   devise_scope :user do
     get "users/change_password", to: "users/registrations#edit_password", as: :edit_user_change_password
   end

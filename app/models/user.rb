@@ -2,7 +2,8 @@ class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable
+         :recoverable, :rememberable, :validatable,
+         :omniauthable, omniauth_providers: [ :google_oauth2 ]
 
   enum :role, { patient: 0, staff: 1, admin: 2 }
 
@@ -15,5 +16,12 @@ class User < ApplicationRecord
 
   def display_name
     name.presence || email
+  end
+
+  def self.from_google(auth)
+    find_by(provider: auth.provider, uid: auth.uid) ||
+      find_by(email: auth.info.email)&.tap { |u| u.update!(provider: auth.provider, uid: auth.uid) } ||
+      create!(provider: auth.provider, uid: auth.uid, email: auth.info.email, name: auth.info.name,
+        password: Devise.friendly_token[0, 20], role: :patient)
   end
 end
