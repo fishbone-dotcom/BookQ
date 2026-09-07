@@ -37,6 +37,8 @@ BookQ is a clinic booking SaaS: a Rails 8.1 app (SQLite, Propshaft, Hotwire/Turb
 
 **Double-booking prevention lives in `Appointment#no_overlapping_appointments`** (model-level validation, not a DB constraint): it queries other non-cancelled appointments in the same clinic whose time range intersects the new one, additionally scoped to `staff_id` when one is set. Any change to appointment scheduling logic needs to go through this validation, not around it.
 
+This is safe under real concurrent requests only because Rails' SQLite adapter opens every transaction with `BEGIN IMMEDIATE` by default, so the overlap-check query and the insert are effectively serialized per booking attempt — see `spec/services/appointment_booking_spec.rb` for a forked-process regression test proving two simultaneous bookings for the same slot can't both succeed. If this app ever moves off SQLite (e.g. Postgres via `DATABASE_URL`), re-verify this: other adapters don't all default to an immediate/serializing transaction start, and the validation alone would no longer be race-safe.
+
 **Testing**: RSpec + FactoryBot (not Minitest, despite `test/` still existing from `rails new` scaffolding — new specs belong in `spec/`). Devise request-spec sign-in helpers are wired in `spec/rails_helper.rb` via `Devise::Test::IntegrationHelpers` for `type: :request`.
 
 **Deployment**: Kamal is scaffolded (`config/deploy.yml`, `.kamal/`) for eventual Docker-based VPS deployment, but Docker cannot run in the current local dev sandbox (no cgroup access) — local development only uses `bin/rails server` directly.
