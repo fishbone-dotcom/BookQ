@@ -6,7 +6,7 @@ RSpec.describe "Home", type: :request do
       it "shows sign up and log in links" do
         get root_path
         expect(response).to have_http_status(:success)
-        expect(response.body).to include("Sign up")
+        expect(response.body).to include("Get Started")
         expect(response.body).to include("Log in")
       end
     end

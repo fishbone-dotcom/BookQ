@@ -98,35 +98,53 @@
   </div>
 <% else %>
   <div class="w-full max-w-5xl mx-auto flex flex-col gap-16 lg:gap-24 pb-16">
-    <%# Hero %>
-    <div class="text-center pt-4 lg:pt-10">
-      <p class="font-bold text-lg text-emerald-700 mb-4">BookQ</p>
-      <h1 class="font-bold text-3xl lg:text-5xl text-gray-900 mb-4 max-w-2xl mx-auto leading-tight">
-        Clinic booking, without the Messenger back-and-forth
-      </h1>
-      <p class="text-gray-500 text-sm lg:text-lg mb-8 max-w-md lg:max-w-xl mx-auto">
-        BookQ lets patients see real-time open slots and book instantly — no more waiting for a reply to "kailan available?"
-      </p>
-
-      <div class="flex flex-col items-center gap-3 max-w-xs mx-auto">
-        <%= button_to omniauth_authorize_path(:user, :google_oauth2), data: { turbo: false },
-              class: "w-full flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-lg shadow-sm transition" do %>
-          <%= render "icons/google" %>
-          Continue with Google
+    <%# Nav %>
+    <div class="w-full flex items-center justify-between pt-4">
+      <span class="font-bold text-lg text-emerald-700">BookQ</span>
+      <div class="flex items-center gap-4">
+        <a href="#features" class="hidden sm:inline text-sm text-gray-600 hover:text-gray-900 font-medium">For Clinics</a>
+        <%= link_to new_user_session_path,
+              class: "flex items-center gap-1.5 text-sm font-medium text-gray-700 border border-gray-300 rounded-full pl-3 pr-4 py-1.5 hover:bg-gray-50 transition" do %>
+          <%= render "icons/profile", size: 14 %>
+          Log in
         <% end %>
-        <%= link_to "Sign up with email", new_user_registration_path, class: "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition" %>
-        <%= link_to "Log in", new_user_session_path, class: "text-sm text-gray-500 hover:text-gray-700 mt-1" %>
       </div>
     </div>
 
+    <%# Hero %>
+    <div class="text-center pt-2 lg:pt-8">
+      <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-5">
+        <%= render "icons/calendar", size: 14 %>
+        A smarter way to book
+      </span>
+      <h1 class="font-bold text-3xl lg:text-5xl text-gray-900 mb-4 max-w-2xl mx-auto leading-tight">
+        A Smarter Way to <span class="text-emerald-600">Book Clinic Appointments</span>
+      </h1>
+      <p class="text-gray-500 text-sm lg:text-lg mb-8 max-w-md lg:max-w-xl mx-auto">
+        Find available schedules, choose your preferred time, and book with confidence — no more waiting for a reply to "kailan available?"
+      </p>
+
+      <%= link_to new_user_registration_path,
+            class: "inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-3 rounded-full shadow-sm transition" do %>
+        Get Started
+        <%= render "icons/chevron_right", size: 16 %>
+      <% end %>
+
+      <p class="text-xs text-gray-500 mt-3">Free to sign up — takes less than a minute.</p>
+      <%= button_to omniauth_authorize_path(:user, :google_oauth2), data: { turbo: false },
+            class: "mt-1 text-xs text-emerald-600 hover:underline font-medium bg-transparent border-0 p-0 cursor-pointer" do %>
+        or continue with Google
+      <% end %>
+    </div>
+
     <%# Features %>
-    <div>
+    <div id="features">
       <h2 class="text-center font-bold text-2xl text-gray-900 mb-8 lg:mb-10">Everything a clinic needs to manage bookings</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <% [
              [ "calendar", "Real-time availability", "See each doctor's open hours and book a slot instantly — no waiting for a reply." ],
              [ "bell", "Automatic confirmations", "Patients get an email confirmation the moment a booking goes through." ],
-             [ "clock", "No double-booking", "Every slot is checked against the doctor's schedule before it's confirmed." ],
+             [ "shield_check", "No double-booking", "Every slot is checked against the doctor's schedule before it's confirmed." ],
              [ "building", "Multiple clinics", "Book across any clinic on BookQ from a single account." ]
            ].each do |icon, title, desc| %>
           <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
@@ -142,20 +160,52 @@
 
     <%# How it works %>
     <div>
-      <h2 class="text-center font-bold text-2xl text-gray-900 mb-8 lg:mb-10">How it works</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 lg:gap-10 max-w-3xl mx-auto">
-        <% [
-             [ "1", "Find a clinic", "Search for the clinic you want to book with." ],
-             [ "2", "Pick a time", "Choose a service, an optional doctor, and an open slot." ],
-             [ "3", "Get confirmed", "Your appointment is booked instantly — no waiting on a reply." ]
-           ].each do |step, title, desc| %>
-          <div class="text-center">
-            <span class="w-9 h-9 rounded-full bg-emerald-600 text-white font-semibold text-sm flex items-center justify-center mx-auto mb-3"><%= step %></span>
-            <h3 class="font-semibold text-gray-900 text-sm mb-1"><%= title %></h3>
-            <p class="text-gray-500 text-xs leading-relaxed"><%= desc %></p>
-          </div>
-        <% end %>
+      <p class="text-center text-emerald-600 text-xs font-semibold tracking-wide uppercase mb-2">How it works</p>
+      <h2 class="text-center font-bold text-2xl text-gray-900 mb-8 lg:mb-10">Book in three simple steps</h2>
+      <div class="relative max-w-3xl mx-auto">
+        <div class="absolute top-5 sm:top-6 left-[16.67%] right-[16.67%] border-t-2 border-dashed border-emerald-200"></div>
+        <div class="relative grid grid-cols-3 gap-2 sm:gap-6 lg:gap-10">
+          <% [
+               [ "search", "Find a clinic", "Search for the clinic you want to book with." ],
+               [ "calendar", "Pick a time", "Choose a service, an optional doctor, and an open slot." ],
+               [ "checkmark", "Get confirmed", "Your appointment is booked instantly — no waiting on a reply." ]
+             ].each do |icon, title, desc| %>
+            <div class="text-center">
+              <span class="relative z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center mx-auto mb-3 shadow-sm">
+                <%= render "icons/#{icon}", size: 18 %>
+              </span>
+              <h3 class="font-semibold text-gray-900 text-xs sm:text-sm mb-1"><%= title %></h3>
+              <p class="text-gray-500 text-[10px] sm:text-xs leading-snug sm:leading-relaxed"><%= desc %></p>
+            </div>
+          <% end %>
+        </div>
       </div>
+    </div>
+
+    <%# Illustrated tagline banner %>
+    <div class="relative bg-emerald-50 rounded-2xl px-6 py-10 lg:py-14 overflow-hidden">
+      <div class="relative z-10 max-w-xs lg:max-w-sm">
+        <h2 class="font-bold text-2xl text-gray-900 mb-1">Better care. Less hassle.</h2>
+        <p class="text-gray-600 text-sm">Your health, on your schedule.</p>
+      </div>
+      <svg viewBox="0 0 240 140" class="absolute -right-2 -bottom-4 w-48 lg:w-64" aria-hidden="true">
+        <ellipse cx="40" cy="28" rx="28" ry="13" fill="#ffffff" opacity="0.6" />
+        <ellipse cx="95" cy="16" rx="18" ry="9" fill="#ffffff" opacity="0.5" />
+        <rect x="0" y="118" width="240" height="22" fill="#a7f3d0" opacity="0.5" />
+        <rect x="18" y="95" width="6" height="25" rx="1" fill="#047857" />
+        <circle cx="21" cy="88" r="16" fill="#34d399" />
+        <rect x="205" y="100" width="6" height="20" rx="1" fill="#047857" />
+        <circle cx="208" cy="94" r="13" fill="#6ee7b7" />
+        <rect x="70" y="55" width="100" height="65" rx="4" fill="#ffffff" stroke="#10b981" stroke-width="2" />
+        <rect x="85" y="70" width="14" height="14" rx="2" fill="#d1fae5" />
+        <rect x="113" y="70" width="14" height="14" rx="2" fill="#d1fae5" />
+        <rect x="141" y="70" width="14" height="14" rx="2" fill="#d1fae5" />
+        <rect x="85" y="94" width="14" height="14" rx="2" fill="#d1fae5" />
+        <rect x="141" y="94" width="14" height="14" rx="2" fill="#d1fae5" />
+        <rect x="110" y="90" width="20" height="30" rx="2" fill="#10b981" />
+        <rect x="117" y="97" width="6" height="16" fill="#ffffff" />
+        <rect x="112" y="102" width="16" height="6" fill="#ffffff" />
+      </svg>
     </div>
 
     <%# Closing CTA %>
@@ -163,14 +213,18 @@
       <h2 class="font-bold text-2xl lg:text-3xl mb-2">Ready to book your first appointment?</h2>
       <p class="text-emerald-100 text-sm lg:text-base mb-8">It only takes a minute to get started.</p>
       <div class="flex flex-col items-center gap-3 max-w-xs mx-auto">
+        <%= link_to "Get Started", new_user_registration_path,
+              class: "w-full bg-white hover:bg-gray-50 text-emerald-700 font-medium py-2.5 rounded-full transition" %>
         <%= button_to omniauth_authorize_path(:user, :google_oauth2), data: { turbo: false },
-              class: "w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-lg transition" do %>
+              class: "w-full flex items-center justify-center gap-2 bg-emerald-900/40 hover:bg-emerald-900/60 text-white font-medium py-2.5 rounded-full transition border border-white/20" do %>
           <%= render "icons/google" %>
           Continue with Google
         <% end %>
-        <%= link_to "Sign up with email", new_user_registration_path, class: "w-full bg-emerald-900/40 hover:bg-emerald-900/60 text-white font-medium py-2.5 rounded-lg transition border border-white/20" %>
         <%= link_to "Log in", new_user_session_path, class: "text-sm text-emerald-100 hover:text-white mt-1" %>
       </div>
     </div>
+
+    <%# Footer %>
+    <p class="text-center text-xs text-gray-400 -mt-10">BookQ &middot; Better care. Less hassle.</p>
   </div>
 <% end %>

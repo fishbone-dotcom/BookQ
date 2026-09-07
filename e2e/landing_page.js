@@ -15,10 +15,13 @@ const path = require("path");
 
   const body = await page.locator("body").textContent();
 
+  // Nav
+  check("nav has a 'Log in' link", body.includes("Log in"));
+
   // Hero
-  check("hero headline is present", body.includes("Clinic booking, without the Messenger back-and-forth"));
-  check("hero has a 'Continue with Google' button", body.includes("Continue with Google"));
-  check("hero has a 'Sign up with email' link", body.includes("Sign up with email"));
+  check("hero headline is present", body.includes("A Smarter Way to") && body.includes("Book Clinic Appointments"));
+  check("hero has a 'Get Started' button", body.includes("Get Started"));
+  check("hero has a 'continue with Google' link", body.includes("continue with Google"));
 
   // Features
   check("features section heading is present", body.includes("Everything a clinic needs to manage bookings"));
@@ -26,9 +29,12 @@ const path = require("path");
   check("mentions no double-booking", body.includes("No double-booking"));
 
   // How it works
-  check("how-it-works heading is present", body.includes("How it works"));
+  check("how-it-works heading is present", body.includes("Book in three simple steps"));
   check("step 1 'Find a clinic' is present", body.includes("Find a clinic"));
   check("step 3 'Get confirmed' is present", body.includes("Get confirmed"));
+
+  // Illustrated tagline banner
+  check("tagline banner is present", body.includes("Better care. Less hassle."));
 
   // Closing CTA
   check("closing CTA heading is present", body.includes("Ready to book your first appointment?"));
