@@ -30,7 +30,12 @@
               class: "bg-red-50 border border-red-300 text-red-700 font-medium px-3 py-1.5 rounded-lg text-sm cursor-pointer hover:bg-red-100 transition shrink-0" %>
       </div>
     <% end %>
-    <div data-controller="booking-wizard" data-booking-wizard-step-value="<%= @editing_appointment && @date.present? ? 4 : (@date.present? ? 3 : (params[:service_id].present? ? 2 : 1)) %>">
+    <div data-controller="booking-wizard"
+         data-booking-wizard-step-value="<%= @editing_appointment && @date.present? ? 4 : (@date.present? ? 3 : (params[:service_id].present? ? 2 : 1)) %>"
+         data-booking-wizard-service-id-value="<%= @service.id %>"
+         data-booking-wizard-previous-staff-value="<%= @editing_appointment&.staff&.display_name %>"
+         data-booking-wizard-previous-date-value="<%= @editing_appointment&.starts_at&.strftime("%A, %B %-d") %>"
+         data-booking-wizard-previous-time-value="<%= @editing_appointment&.starts_at&.strftime("%-I:%M %p") %>">
 
       <!-- Step indicator -->
       <div class="relative mb-8">
@@ -38,7 +43,8 @@
         <div data-booking-wizard-target="progressLine" class="absolute top-3.5 left-0 h-0.5 bg-emerald-600 transition-all" style="margin-inline-start: 12.5%; width: 0%;"></div>
         <div class="relative flex justify-between">
           <% [ [ 1, "Service" ], [ 2, "Doctor" ], [ 3, "Schedule" ], [ 4, "Confirm" ] ].each do |step, label| %>
-            <div data-booking-wizard-target="stepIndicator" data-step="<%= step %>" class="flex flex-col items-center gap-1 flex-1">
+            <div data-booking-wizard-target="stepIndicator" data-step="<%= step %>"
+                 data-action="click->booking-wizard#jumpTo" class="flex flex-col items-center gap-1 flex-1">
               <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold step-circle">
                 <%= step %>
               </div>
@@ -73,7 +79,8 @@
       </div>
 
       <%= form_with url: @editing_appointment ? appointment_path(@editing_appointment) : clinic_booking_path(@clinic),
-            method: @editing_appointment ? :patch : :post, data: { "booking-wizard-target": "bookingForm", turbo_frame: "_top" } do |f| %>
+            method: @editing_appointment ? :patch : :post,
+            data: { "booking-wizard-target": "bookingForm", turbo_frame: "_top", action: "turbo:submit-start->booking-wizard#clearStorage" } do |f| %>
         <%= f.hidden_field :service_id, value: @service.id %>
         <%= f.hidden_field :month, value: @month.strftime("%Y-%m") %>
         <%= f.hidden_field :date, value: @date&.iso8601, data: { "booking-wizard-target": "hiddenDate" } %>
@@ -81,7 +88,7 @@
         <!-- Step 2: Doctor (client-side only — availability isn't per-doctor yet) -->
         <div data-booking-wizard-target="stepPanel" data-step="2" class="flex flex-col gap-2">
           <label class="group relative flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 cursor-pointer shadow-sm has-checked:border-emerald-600 has-checked:bg-emerald-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 transition">
-            <input type="radio" name="staff_id" value="" class="sr-only" data-name="Anyone" <%= "checked" if @staff_id.blank? %>>
+            <input type="radio" name="staff_id" value="" class="sr-only" data-name="Anyone" data-action="change->booking-wizard#staffChanged" <%= "checked" if @staff_id.blank? %>>
             <span class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 flex-none">
               <%= render "icons/users", size: 18 %>
             </span>
@@ -91,7 +98,7 @@
           <% @clinic_staffs.each do |clinic_staff| %>
             <% staff = clinic_staff.user %>
             <label class="group relative flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 cursor-pointer shadow-sm has-checked:border-emerald-600 has-checked:bg-emerald-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 transition">
-              <input type="radio" name="staff_id" value="<%= staff.id %>" class="sr-only" data-name="<%= staff.display_name %>" <%= "checked" if @staff_id == staff.id.to_s %>>
+              <input type="radio" name="staff_id" value="<%= staff.id %>" class="sr-only" data-name="<%= staff.display_name %>" data-action="change->booking-wizard#staffChanged" <%= "checked" if @staff_id == staff.id.to_s %>>
               <span class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm font-semibold flex-none"><%= staff.display_name.first.upcase %></span>
               <span class="flex-1">
                 <span class="block text-sm font-medium text-gray-900"><%= staff.display_name %></span>
@@ -176,15 +183,24 @@
             </div>
             <div class="flex justify-between gap-3">
               <dt class="text-gray-500">Doctor</dt>
-              <dd class="text-gray-900 font-medium text-right" data-booking-wizard-target="summaryStaff">—</dd>
+              <dd class="text-right">
+                <span class="block text-gray-900 font-medium" data-booking-wizard-target="summaryStaff">—</span>
+                <span class="block text-xs text-gray-400 line-through" data-booking-wizard-target="summaryStaffPrevious" hidden></span>
+              </dd>
             </div>
             <div class="flex justify-between gap-3">
               <dt class="text-gray-500">Date</dt>
-              <dd class="text-gray-900 font-medium text-right" data-booking-wizard-target="summaryDate">—</dd>
+              <dd class="text-right">
+                <span class="block text-gray-900 font-medium" data-booking-wizard-target="summaryDate">—</span>
+                <span class="block text-xs text-gray-400 line-through" data-booking-wizard-target="summaryDatePrevious" hidden></span>
+              </dd>
             </div>
             <div class="flex justify-between gap-3">
               <dt class="text-gray-500">Time</dt>
-              <dd class="text-gray-900 font-medium text-right" data-booking-wizard-target="summaryTime">—</dd>
+              <dd class="text-right">
+                <span class="block text-gray-900 font-medium" data-booking-wizard-target="summaryTime">—</span>
+                <span class="block text-xs text-gray-400 line-through" data-booking-wizard-target="summaryTimePrevious" hidden></span>
+              </dd>
             </div>
             <% if @service.price.present? %>
               <div class="flex justify-between gap-3 items-center pt-3 border-t border-gray-200">
