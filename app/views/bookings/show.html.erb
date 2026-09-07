@@ -1,4 +1,4 @@
-<div class="w-full max-w-2xl mx-auto">
+<div class="w-full max-w-2xl lg:max-w-3xl mx-auto">
   <%= link_to root_path, class: "inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4" do %>
     ← Back
   <% end %>
@@ -111,62 +111,68 @@
 
         <!-- Step 3: Schedule -->
         <div data-booking-wizard-target="stepPanel" data-step="3">
-          <div class="flex items-center justify-between mb-3">
-            <%= link_to "← #{(@month - 1.month).strftime('%b')}", clinic_booking_path(@clinic, month: (@month - 1.month).strftime("%Y-%m"), service_id: @service.id, staff_id: @staff_id), class: "text-emerald-600 hover:underline text-sm py-2 px-1 -mx-1" %>
-            <span class="font-semibold text-gray-900"><%= @month.strftime("%B %Y") %></span>
-            <%= link_to "#{(@month + 1.month).strftime('%b')} →", clinic_booking_path(@clinic, month: (@month + 1.month).strftime("%Y-%m"), service_id: @service.id, staff_id: @staff_id), class: "text-emerald-600 hover:underline text-sm py-2 px-1 -mx-1" %>
-          </div>
+          <div class="lg:flex lg:gap-8 lg:items-start">
+            <div class="lg:w-72 lg:shrink-0">
+              <div class="flex items-center justify-between mb-3">
+                <%= link_to "← #{(@month - 1.month).strftime('%b')}", clinic_booking_path(@clinic, month: (@month - 1.month).strftime("%Y-%m"), service_id: @service.id, staff_id: @staff_id), class: "text-emerald-600 hover:underline text-sm py-2 px-1 -mx-1" %>
+                <span class="font-semibold text-gray-900"><%= @month.strftime("%B %Y") %></span>
+                <%= link_to "#{(@month + 1.month).strftime('%b')} →", clinic_booking_path(@clinic, month: (@month + 1.month).strftime("%Y-%m"), service_id: @service.id, staff_id: @staff_id), class: "text-emerald-600 hover:underline text-sm py-2 px-1 -mx-1" %>
+              </div>
 
-          <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-400 mb-1">
-            <% %w[Sun Mon Tue Wed Thu Fri Sat].each do |d| %>
-              <div><%= d %></div>
-            <% end %>
-          </div>
+              <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-400 mb-1">
+                <% %w[Sun Mon Tue Wed Thu Fri Sat].each do |d| %>
+                  <div><%= d %></div>
+                <% end %>
+              </div>
 
-          <div class="grid grid-cols-7 gap-1 mb-4">
-            <% @month.beginning_of_month.wday.times do %>
-              <div></div>
-            <% end %>
-            <% @calendar_days.each do |day| %>
-              <% resting_class = day[:available] ? "bg-white text-gray-900 hover:bg-emerald-50 border border-gray-200" : "bg-gray-50 text-gray-400 border border-gray-100" %>
-              <% resting_dot_class = day[:available] ? "bg-green-500" : "bg-red-400" %>
-              <%= link_to clinic_booking_path(@clinic, month: @month.strftime("%Y-%m"), date: day[:date].iso8601, service_id: @service.id, staff_id: @staff_id),
-                    data: { turbo_frame: "slots", action: "click->booking-wizard#selectDate", date: day[:date].iso8601, label: day[:date].strftime("%A, %B %-d"), "resting-class": resting_class },
-                    "data-booking-wizard-target": "dateCell",
-                    class: "relative flex flex-col items-center justify-center h-11 rounded-lg text-sm #{day[:date] == @date ? 'bg-emerald-600 text-white font-semibold' : resting_class}" do %>
-                <span><%= day[:date].day %></span>
-                <span class="avail-dot w-1.5 h-1.5 rounded-full mt-0.5 <%= day[:date] == @date ? 'bg-white' : resting_dot_class %>" data-resting-class="<%= resting_dot_class %>"></span>
-              <% end %>
-            <% end %>
-          </div>
-
-          <div class="flex items-center gap-4 mb-4 text-xs text-gray-500">
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span> Slots available</span>
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span> Full / closed</span>
-          </div>
-
-          <%= turbo_frame_tag "slots" do %>
-            <% if flash[:alert].present? %>
-              <p class="bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2 text-sm mb-3"><%= flash[:alert] %></p>
-            <% end %>
-
-            <% if @date.present? %>
-              <% available_slots = @slots.select(&:available).map { |s| [ s.starts_at.strftime("%-I:%M %p"), s.starts_at.iso8601 ] }.uniq { |_, value| value } %>
-              <% if available_slots.empty? %>
-                <p class="text-gray-500 text-sm text-center py-6">No available time slots on this day.</p>
-              <% else %>
-                <div class="grid grid-cols-3 gap-2">
-                  <% available_slots.each do |label, value| %>
-                    <label class="relative flex items-center justify-center border border-gray-200 rounded-xl py-2.5 text-sm font-medium text-gray-700 cursor-pointer shadow-sm has-checked:border-emerald-600 has-checked:bg-emerald-600 has-checked:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 transition">
-                      <input type="radio" name="starts_at" value="<%= value %>" class="sr-only" data-action="change->booking-wizard#slotChanged" data-label="<%= label %>"
-                        <%= "checked" if @editing_appointment && value == @editing_appointment.starts_at.iso8601 %>>
-                      <%= label %>
-                    </label>
+              <div class="grid grid-cols-7 gap-1 mb-4">
+                <% @month.beginning_of_month.wday.times do %>
+                  <div></div>
+                <% end %>
+                <% @calendar_days.each do |day| %>
+                  <% resting_class = day[:available] ? "bg-white text-gray-900 hover:bg-emerald-50 border border-gray-200" : "bg-gray-50 text-gray-400 border border-gray-100" %>
+                  <% resting_dot_class = day[:available] ? "bg-green-500" : "bg-red-400" %>
+                  <%= link_to clinic_booking_path(@clinic, month: @month.strftime("%Y-%m"), date: day[:date].iso8601, service_id: @service.id, staff_id: @staff_id),
+                        data: { turbo_frame: "slots", action: "click->booking-wizard#selectDate", date: day[:date].iso8601, label: day[:date].strftime("%A, %B %-d"), "resting-class": resting_class },
+                        "data-booking-wizard-target": "dateCell",
+                        class: "relative flex flex-col items-center justify-center h-11 rounded-lg text-sm #{day[:date] == @date ? 'bg-emerald-600 text-white font-semibold' : resting_class}" do %>
+                    <span><%= day[:date].day %></span>
+                    <span class="avail-dot w-1.5 h-1.5 rounded-full mt-0.5 <%= day[:date] == @date ? 'bg-white' : resting_dot_class %>" data-resting-class="<%= resting_dot_class %>"></span>
                   <% end %>
-                </div>
+                <% end %>
+              </div>
+
+              <div class="flex items-center gap-4 mb-4 text-xs text-gray-500">
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span> Slots available</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span> Full / closed</span>
+              </div>
+            </div>
+
+            <div class="lg:flex-1 lg:pt-11">
+              <%= turbo_frame_tag "slots" do %>
+                <% if flash[:alert].present? %>
+                  <p class="bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2 text-sm mb-3"><%= flash[:alert] %></p>
+                <% end %>
+
+                <% if @date.present? %>
+                  <% available_slots = @slots.select(&:available).map { |s| [ s.starts_at.strftime("%-I:%M %p"), s.starts_at.iso8601 ] }.uniq { |_, value| value } %>
+                  <% if available_slots.empty? %>
+                    <p class="text-gray-500 text-sm text-center py-6">No available time slots on this day.</p>
+                  <% else %>
+                    <div class="grid grid-cols-3 lg:grid-cols-4 gap-2">
+                      <% available_slots.each do |label, value| %>
+                        <label class="relative flex items-center justify-center border border-gray-200 rounded-xl py-2.5 text-sm font-medium text-gray-700 cursor-pointer shadow-sm has-checked:border-emerald-600 has-checked:bg-emerald-600 has-checked:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 transition">
+                          <input type="radio" name="starts_at" value="<%= value %>" class="sr-only" data-action="change->booking-wizard#slotChanged" data-label="<%= label %>"
+                            <%= "checked" if @editing_appointment && value == @editing_appointment.starts_at.iso8601 %>>
+                          <%= label %>
+                        </label>
+                      <% end %>
+                    </div>
+                  <% end %>
+                <% end %>
               <% end %>
-            <% end %>
-          <% end %>
+            </div>
+          </div>
         </div>
 
         <!-- Step 4: Confirm -->

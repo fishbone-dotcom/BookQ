@@ -1,0 +1,38 @@
+<aside class="hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 lg:min-h-screen lg:sticky lg:top-0 lg:border-r lg:border-gray-200 lg:bg-white lg:py-6 lg:px-5">
+  <%= link_to root_path, class: "flex items-center gap-2 mb-8 px-1" do %>
+    <span class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">Q</span>
+    <span class="font-bold text-lg text-gray-900">BookQ</span>
+  <% end %>
+
+  <nav class="flex flex-col gap-1 flex-1">
+    <%= link_to root_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition #{current_page?(root_path) ? "bg-emerald-50 text-emerald-700" : "text-gray-600 hover:bg-gray-50"}" do %>
+      <%= render "icons/house", size: 18 %>
+      Home
+    <% end %>
+  </nav>
+
+  <div class="border-t border-gray-200 pt-4 mt-4 flex flex-col gap-1">
+    <% if current_user.admin? %>
+      <%= link_to admin_dashboard_path, class: "flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition" do %>
+        <%= render "icons/dashboard", size: 16 %>
+        Admin Dashboard
+      <% end %>
+    <% end %>
+    <% if current_user.clinics.any? %>
+      <%= link_to staff_dashboard_path, class: "flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition" do %>
+        <%= render "icons/dashboard", size: 16 %>
+        Staff Dashboard
+      <% end %>
+    <% end %>
+
+    <div class="flex items-center gap-3 px-3 py-2 mt-2">
+      <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-semibold text-xs flex items-center justify-center flex-none"><%= current_user.display_name.first.upcase %></span>
+      <span class="text-sm text-gray-700 truncate flex-1"><%= current_user.display_name %></span>
+    </div>
+    <%= button_to destroy_user_session_path, method: :delete, data: { turbo: false },
+          class: "flex items-center gap-3 text-left px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-gray-50 transition cursor-pointer bg-transparent w-full" do %>
+      <%= render "icons/logout", size: 16 %>
+      Log out
+    <% end %>
+  </div>
+</aside>
