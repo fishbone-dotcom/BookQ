@@ -1,11 +1,22 @@
 class AppointmentMailer < ApplicationMailer
+  def confirmation(appointment)
+    @appointment = appointment
+    @clinic = appointment.clinic
+    @service = appointment.service
+
+    mail(
+      to: appointment.contact_email,
+      subject: "Your #{@service.name} appointment at #{@clinic.name} is confirmed"
+    )
+  end
+
   def reminder(appointment)
     @appointment = appointment
     @clinic = appointment.clinic
     @service = appointment.service
 
     mail(
-      to: appointment.patient.email,
+      to: appointment.contact_email,
       subject: "Reminder: your #{@service.name} appointment at #{@clinic.name} is tomorrow"
     )
   end
@@ -16,7 +27,7 @@ class AppointmentMailer < ApplicationMailer
     @service = appointment.service
 
     mail(
-      to: appointment.patient.email,
+      to: appointment.contact_email,
       subject: "Your #{@service.name} appointment at #{@clinic.name} has been cancelled"
     )
   end

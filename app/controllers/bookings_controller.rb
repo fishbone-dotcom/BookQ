@@ -1,5 +1,4 @@
 class BookingsController < ApplicationController
-  before_action :authenticate_user!
   before_action :set_clinic
 
   def show
@@ -7,12 +6,20 @@ class BookingsController < ApplicationController
   end
 
   def create
-    result = AppointmentBooking.new(clinic: @clinic, params: params, actor: current_user).create_for(current_user)
+    if user_signed_in?
+      result = AppointmentBooking.new(clinic: @clinic, params: params, actor: current_user).create_for(current_user)
+      return redirect_to_booking(alert: result.error) unless result.success?
 
-    if result.success?
       redirect_to root_path, notice: "Your appointment is booked for #{I18n.l(result.appointment.starts_at, format: :long)}."
     else
-      redirect_to_booking alert: result.error
+      result = AppointmentBooking.new(clinic: @clinic, params: params, actor: nil).create_for_guest(
+        guest_name: params[:guest_name], guest_email: params[:guest_email], guest_phone: params[:guest_phone]
+      )
+      return redirect_to_booking(alert: result.error) unless result.success?
+
+      AppointmentMailer.confirmation(result.appointment).deliver_later
+      redirect_to guest_appointment_path(result.appointment.signed_id(purpose: :guest_management, expires_in: 60.days)),
+        notice: "Appointment confirmed!"
     end
   end
 
@@ -28,7 +35,7 @@ class BookingsController < ApplicationController
   end
 
   def load_booking_context
-    @active_appointment = current_user.patient_appointments.active.order(:starts_at).first
+    @active_appointment = current_user&.patient_appointments&.active&.order(:starts_at)&.first
     @editing_appointment = @active_appointment if @active_appointment&.clinic_id == @clinic.id
 
     @services = @clinic.services.order(:name)

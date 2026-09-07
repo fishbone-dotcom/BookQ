@@ -40,6 +40,49 @@ RSpec.describe AppointmentMailer, type: :mailer do
     end
   end
 
+  describe "#confirmation" do
+    let(:clinic) { create(:clinic, name: "Sunrise Clinic", address: "123 Main St") }
+    let(:service) { create(:service, clinic: clinic, name: "Cleaning") }
+
+    context "for an authenticated booking" do
+      let(:patient) { create(:user, name: "Juan Dela Cruz", email: "juan@example.com") }
+      let(:appointment) do
+        create(:appointment, clinic: clinic, service: service, patient: patient,
+          starts_at: 1.day.from_now.change(hour: 10, min: 0), ends_at: 1.day.from_now.change(hour: 10, min: 30))
+      end
+      let(:mail) { AppointmentMailer.confirmation(appointment) }
+
+      it "addresses the email to the patient" do
+        expect(mail.to).to eq([ "juan@example.com" ])
+      end
+
+      it "does not include a guest management or account-creation link" do
+        expect(mail.body.encoded).not_to include("Manage your appointment")
+        expect(mail.body.encoded).not_to include("Create a free BookQ account")
+      end
+    end
+
+    context "for a guest booking" do
+      let(:appointment) do
+        create(:appointment, :guest, clinic: clinic, service: service, guest_name: "Maria Santos", guest_email: "maria@example.com",
+          starts_at: 1.day.from_now.change(hour: 10, min: 0), ends_at: 1.day.from_now.change(hour: 10, min: 30))
+      end
+      let(:mail) { AppointmentMailer.confirmation(appointment) }
+
+      it "addresses the email to the guest" do
+        expect(mail.to).to eq([ "maria@example.com" ])
+      end
+
+      it "includes the appointment details, a management link, and an account-creation offer" do
+        expect(mail.body.encoded).to include("Sunrise Clinic")
+        expect(mail.body.encoded).to include("Cleaning")
+        expect(mail.body.encoded).to include("Maria Santos")
+        expect(mail.body.encoded).to include("Manage your appointment")
+        expect(mail.body.encoded).to include("Create a free BookQ account")
+      end
+    end
+  end
+
   describe "#staff_unavailable" do
     let(:clinic) { create(:clinic, name: "Sunrise Clinic", address: "123 Main St") }
     let(:service) { create(:service, clinic: clinic, name: "Cleaning") }

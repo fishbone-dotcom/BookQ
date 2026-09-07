@@ -1,6 +1,6 @@
 <p>Hi <%= @appointment.contact_name %>,</p>
 
-<p>This is a reminder that you have an upcoming appointment tomorrow:</p>
+<p>Your appointment is confirmed:</p>
 
 <ul>
   <li><strong>Clinic:</strong> <%= @clinic.name %></li>
@@ -14,4 +14,9 @@
   <% end %>
 </ul>
 
-<p>See you then! If you need to reschedule or cancel, please do so from your BookQ account.</p>
+<% if @appointment.guest? %>
+  <p>You can view, manage, or cancel this booking anytime here: <%= link_to "Manage your appointment", guest_appointment_url(@appointment.signed_id(purpose: :guest_management, expires_in: 60.days)) %></p>
+  <p>Want your appointment history and faster booking next time? <%= link_to "Create a free BookQ account", new_user_registration_url(email: @appointment.guest_email) %>.</p>
+<% else %>
+  <p>You can manage this booking anytime from your BookQ account.</p>
+<% end %>

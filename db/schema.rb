@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_07_140037) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_07_170435) do
   create_table "appointment_audits", force: :cascade do |t|
     t.integer "action", null: false
     t.integer "actor_id"
@@ -27,8 +27,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_140037) do
     t.integer "clinic_id", null: false
     t.datetime "created_at", null: false
     t.datetime "ends_at", null: false
+    t.string "guest_email"
+    t.string "guest_name"
+    t.string "guest_phone"
     t.text "notes"
-    t.integer "patient_id", null: false
+    t.integer "patient_id"
     t.datetime "reminder_sent_at"
     t.integer "service_id", null: false
     t.integer "staff_id"
@@ -37,6 +40,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_140037) do
     t.datetime "updated_at", null: false
     t.index ["clinic_id", "starts_at"], name: "index_appointments_on_clinic_id_and_starts_at"
     t.index ["clinic_id"], name: "index_appointments_on_clinic_id"
+    t.index ["guest_email"], name: "index_appointments_on_guest_email"
     t.index ["patient_id"], name: "index_appointments_on_patient_id"
     t.index ["reminder_sent_at"], name: "index_appointments_on_reminder_sent_at"
     t.index ["service_id"], name: "index_appointments_on_service_id"

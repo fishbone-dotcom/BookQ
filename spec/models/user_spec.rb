@@ -69,4 +69,53 @@ RSpec.describe User, type: :model do
       expect(User.count).to eq(1)
     end
   end
+
+  describe "#claim_guest_appointments!" do
+    let(:clinic) { create(:clinic) }
+    let(:service) { create(:service, clinic: clinic) }
+
+    it "attaches an unclaimed guest appointment matching the user's email" do
+      guest_appointment = create(:appointment, :guest, clinic: clinic, service: service, guest_email: "juan@example.com")
+      user = create(:user, email: "juan@example.com")
+
+      user.claim_guest_appointments!
+
+      expect(guest_appointment.reload.patient_id).to eq(user.id)
+      expect(guest_appointment.guest?).to eq(false)
+    end
+
+    it "does not touch a guest appointment already claimed by someone else" do
+      other_user = create(:user, email: "other@example.com")
+      guest_appointment = create(:appointment, :guest, clinic: clinic, service: service, guest_email: "shared@example.com")
+      guest_appointment.update_column(:patient_id, other_user.id)
+
+      user = create(:user, email: "shared@example.com")
+      user.claim_guest_appointments!
+
+      expect(guest_appointment.reload.patient_id).to eq(other_user.id)
+    end
+
+    it "does not touch another user's guest appointments (different email)" do
+      guest_appointment = create(:appointment, :guest, clinic: clinic, service: service, guest_email: "someoneelse@example.com")
+      user = create(:user, email: "juan@example.com")
+
+      user.claim_guest_appointments!
+
+      expect(guest_appointment.reload.patient_id).to be_nil
+    end
+
+    it "skips a claim that would violate the one-active-booking-per-patient rule, without raising" do
+      # Guest appointment must be created before the colliding user exists —
+      # guest_email_not_registered would otherwise block it outright.
+      other_clinic = create(:clinic)
+      guest_appointment = create(:appointment, :guest, clinic: other_clinic, service: create(:service, clinic: other_clinic),
+        guest_email: "juan@example.com")
+
+      user = create(:user, email: "juan@example.com")
+      create(:appointment, patient: user, clinic: clinic, service: service, status: :pending)
+
+      expect { user.claim_guest_appointments! }.not_to raise_error
+      expect(guest_appointment.reload.patient_id).to be_nil
+    end
+  end
 end

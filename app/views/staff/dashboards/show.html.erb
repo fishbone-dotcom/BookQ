@@ -48,10 +48,10 @@
       <% @recent_appointments.each do |appointment| %>
         <div class="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm">
           <span class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 font-semibold text-sm flex items-center justify-center shrink-0">
-            <%= initials_for(appointment.patient) %>
+            <%= contact_initials_for(appointment) %>
           </span>
           <div class="min-w-0 flex-1">
-            <p class="text-sm font-semibold text-gray-900 truncate"><%= appointment.patient.display_name %></p>
+            <p class="text-sm font-semibold text-gray-900 truncate"><%= appointment.contact_name %></p>
             <p class="text-xs text-gray-500 truncate">
               <%= appointment.service.name %>
               <% if appointment.staff %> &middot; <%= appointment.staff.display_name %><% end %>

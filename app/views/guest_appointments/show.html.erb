@@ -1,0 +1,55 @@
+<div class="w-full max-w-sm mx-auto">
+  <% if @appointment.active? %>
+    <div class="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+      <%= render "icons/checkmark", size: 24 %>
+    </div>
+    <h1 class="text-xl font-bold text-gray-900 text-center mb-1">Your appointment</h1>
+    <p class="text-gray-500 text-sm text-center mb-6">Booked under <%= @appointment.guest_email %></p>
+  <% else %>
+    <h1 class="text-xl font-bold text-gray-900 text-center mb-1">This booking is cancelled</h1>
+    <p class="text-gray-500 text-sm text-center mb-6">Booked under <%= @appointment.guest_email %></p>
+  <% end %>
+
+  <dl class="flex flex-col gap-3 text-sm bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 mb-4">
+    <div class="flex justify-between gap-3">
+      <dt class="text-gray-500">Clinic</dt>
+      <dd class="text-gray-900 font-medium text-right"><%= @appointment.clinic.name %></dd>
+    </div>
+    <div class="flex justify-between gap-3">
+      <dt class="text-gray-500">Service</dt>
+      <dd class="text-gray-900 font-medium text-right"><%= @appointment.service.name %></dd>
+    </div>
+    <div class="flex justify-between gap-3">
+      <dt class="text-gray-500">Doctor</dt>
+      <dd class="text-gray-900 font-medium text-right"><%= @appointment.staff&.display_name || "Anyone available" %></dd>
+    </div>
+    <div class="flex justify-between gap-3">
+      <dt class="text-gray-500">Date</dt>
+      <dd class="text-gray-900 font-medium text-right"><%= I18n.l(@appointment.starts_at.to_date, format: :long) %></dd>
+    </div>
+    <div class="flex justify-between gap-3">
+      <dt class="text-gray-500">Time</dt>
+      <dd class="text-gray-900 font-medium text-right"><%= @appointment.starts_at.strftime("%-I:%M %p") %></dd>
+    </div>
+    <div class="flex justify-between gap-3">
+      <dt class="text-gray-500">Status</dt>
+      <dd class="text-gray-900 font-medium text-right capitalize"><%= @appointment.status %></dd>
+    </div>
+  </dl>
+
+  <% if @appointment.active? %>
+    <%= button_to "Cancel booking", cancel_guest_appointment_path(params[:token]), method: :patch,
+          data: { turbo_confirm: "Are you sure you want to cancel this booking? This cannot be undone." },
+          class: "w-full bg-red-50 border border-red-300 text-red-700 font-medium py-2.5 rounded-lg cursor-pointer hover:bg-red-100 transition mb-6" %>
+  <% end %>
+
+  <div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-4 text-center">
+    <p class="text-sm font-semibold text-gray-900 mb-1">Want to manage your appointments more easily?</p>
+    <p class="text-xs text-gray-600 mb-4">Create a BookQ account to see your booking history and book faster next time.</p>
+    <div class="flex flex-col gap-2">
+      <%= link_to "Create account", new_user_registration_path(email: @appointment.guest_email),
+            class: "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg transition" %>
+      <%= link_to "Continue without an account", root_path, class: "text-xs text-gray-500 hover:text-gray-700" %>
+    </div>
+  </div>
+</div>

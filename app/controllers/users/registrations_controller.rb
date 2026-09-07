@@ -4,6 +4,10 @@ module Users
     prepend_before_action :set_minimum_password_length, only: [ :edit_password ]
     before_action :configure_permitted_parameters
 
+    def create
+      super { |resource| resource.claim_guest_appointments! if resource.persisted? }
+    end
+
     # GET /users/change_password — password change lives on its own page,
     # separate from Profile (name/email), since they're different concerns.
     def edit_password

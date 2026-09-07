@@ -84,6 +84,40 @@ RSpec.describe AppointmentBooking, type: :model do
 
   # Back to normal per-example transactions for everything below — only the
   # fork-based concurrency test above needs real cross-process commits.
+  describe "#create_for_guest" do
+    self.use_transactional_tests = true
+
+    it "creates a guest appointment with no audit actor" do
+      result = AppointmentBooking.new(clinic: clinic, params: {
+        service_id: service.id, starts_at: 1.day.from_now.change(hour: 10, min: 0).iso8601
+      }, actor: nil).create_for_guest(guest_name: "Maria Santos", guest_email: "maria@example.com", guest_phone: "0917")
+
+      expect(result.success?).to eq(true)
+      expect(result.appointment.guest?).to eq(true)
+      expect(result.appointment.audits.last.actor).to be_nil
+    end
+
+    it "fails with the same message as an authenticated booking when no time was selected" do
+      result = AppointmentBooking.new(clinic: clinic, params: { service_id: service.id }, actor: nil)
+        .create_for_guest(guest_name: "Maria", guest_email: "maria@example.com", guest_phone: "0917")
+
+      expect(result.success?).to eq(false)
+      expect(result.error).to eq("Please select a time first.")
+    end
+
+    it "shares the same overlap protection as an authenticated booking" do
+      taken = 1.day.from_now.change(hour: 10, min: 0)
+      create(:appointment, clinic: clinic, service: service, starts_at: taken, ends_at: taken + 30.minutes)
+
+      result = AppointmentBooking.new(clinic: clinic, params: {
+        service_id: service.id, starts_at: taken.iso8601
+      }, actor: nil).create_for_guest(guest_name: "Maria", guest_email: "maria@example.com", guest_phone: "0917")
+
+      expect(result.success?).to eq(false)
+      expect(result.error).to match(/Someone else just booked that time/)
+    end
+  end
+
   describe "audit trail" do
     self.use_transactional_tests = true
 

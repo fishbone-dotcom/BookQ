@@ -14,6 +14,9 @@ Rails.application.routes.draw do
     end
   end
 
+  get "guest_appointments/:token", to: "guest_appointments#show", as: :guest_appointment
+  patch "guest_appointments/:token/cancel", to: "guest_appointments#cancel", as: :cancel_guest_appointment
+
   namespace :admin do
     resource :dashboard, only: [ :show ]
   end

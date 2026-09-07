@@ -124,16 +124,47 @@
         Find available schedules, choose your preferred time, and book with confidence — no more waiting for a reply to "kailan available?"
       </p>
 
-      <%= link_to new_user_registration_path,
-            class: "inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-3 rounded-full shadow-sm transition" do %>
+      <a href="#find-clinic"
+         class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-3 rounded-full shadow-sm transition">
         Get Started
         <%= render "icons/chevron_right", size: 16 %>
-      <% end %>
+      </a>
 
-      <p class="text-xs text-gray-500 mt-3">Free to sign up — takes less than a minute.</p>
-      <%= button_to omniauth_authorize_path(:user, :google_oauth2), data: { turbo: false },
-            class: "mt-1 text-xs text-emerald-600 hover:underline font-medium bg-transparent border-0 p-0 cursor-pointer" do %>
-        or continue with Google
+      <p class="text-xs text-gray-500 mt-3">No account needed. Book as a guest.</p>
+      <p class="text-xs text-gray-400 mt-1">
+        Have an account? <%= link_to "Log in", new_user_session_path, class: "text-emerald-600 hover:underline font-medium" %>
+        or <%= button_to "continue with Google", omniauth_authorize_path(:user, :google_oauth2), data: { turbo: false },
+              class: "inline text-emerald-600 hover:underline font-medium bg-transparent border-0 p-0 cursor-pointer" %>
+      </p>
+    </div>
+
+    <%# Find a clinic — guest booking entry point, no account required %>
+    <div id="find-clinic" data-controller="clinic-search">
+      <h2 class="text-center font-bold text-2xl text-gray-900 mb-2">Find a clinic</h2>
+      <p class="text-center text-gray-500 text-sm mb-6">Pick a clinic to see open slots and book instantly.</p>
+
+      <div class="relative mb-1 max-w-md mx-auto">
+        <%= render "icons/search", size: 16, class: "absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" %>
+        <input type="text" placeholder="Search clinics..." autocomplete="off"
+          data-clinic-search-target="input" data-action="input->clinic-search#filter"
+          class="w-full bg-white border border-gray-200 rounded-xl shadow-sm pl-10 pr-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+      </div>
+
+      <% if @clinics.present? %>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-6 max-w-3xl mx-auto">
+          <% @clinics.each do |clinic| %>
+            <%= link_to clinic_booking_path(clinic), class: "flex flex-col items-center gap-1.5 text-center group",
+                  data: { clinic_search_target: "item", clinic_search_name: clinic.name.downcase } do %>
+              <span class="w-14 h-14 rounded-2xl bg-emerald-50 group-hover:bg-emerald-100 text-emerald-600 flex items-center justify-center transition">
+                <%= render "icons/building", size: 20 %>
+              </span>
+              <span class="text-xs text-gray-600 leading-tight line-clamp-2"><%= clinic.name %></span>
+            <% end %>
+          <% end %>
+        </div>
+        <p data-clinic-search-target="empty" class="hidden text-center text-sm text-gray-400 py-4">No clinics found.</p>
+      <% else %>
+        <p class="text-center text-sm text-gray-500 mt-5">No clinics available yet.</p>
       <% end %>
     </div>
 
@@ -208,13 +239,15 @@
       </svg>
     </div>
 
-    <%# Closing CTA %>
+    <%# Closing CTA — for returning patients; guests already have their one
+        primary "Get Started" action in the hero, so this deliberately
+        doesn't repeat it. %>
     <div class="bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-2xl px-6 py-10 lg:py-14 text-center text-white shadow-sm">
+      <h2 class="font-bold text-xl mb-1">Prefer an account?</h2>
+      <p class="text-emerald-100 text-sm mb-6">Sign in for faster booking and appointment history.</p>
       <div class="flex flex-col items-center gap-3 max-w-xs mx-auto">
-        <%= link_to "Get Started", new_user_registration_path,
-              class: "w-full bg-white hover:bg-gray-50 text-emerald-700 font-medium py-2.5 rounded-full transition" %>
         <%= button_to omniauth_authorize_path(:user, :google_oauth2), data: { turbo: false },
-              class: "w-full flex items-center justify-center gap-2 bg-emerald-900/40 hover:bg-emerald-900/60 text-white font-medium py-2.5 rounded-full transition border border-white/20" do %>
+              class: "w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-full transition" do %>
           <%= render "icons/google" %>
           Continue with Google
         <% end %>

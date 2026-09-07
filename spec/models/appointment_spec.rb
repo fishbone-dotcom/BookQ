@@ -175,6 +175,117 @@ RSpec.describe Appointment, type: :model do
     end
   end
 
+  describe "guest bookings" do
+    it "is valid with guest contact info and no patient" do
+      appointment = build(:appointment, :guest, clinic: clinic, service: service)
+      expect(appointment).to be_valid
+    end
+
+    it "is invalid with neither a patient nor guest contact info" do
+      appointment = build(:appointment, clinic: clinic, service: service, patient: nil, guest_name: nil, guest_email: nil)
+      expect(appointment).not_to be_valid
+      expect(appointment.errors[:base]).to include("Please provide your name and email, or sign in.")
+    end
+
+    it "is invalid with a guest_name but no guest_email" do
+      appointment = build(:appointment, clinic: clinic, service: service, patient: nil, guest_name: "Juan", guest_email: nil)
+      expect(appointment).not_to be_valid
+    end
+
+    it "normalizes guest_email to a stripped, downcased value" do
+      appointment = build(:appointment, :guest, clinic: clinic, service: service, guest_email: "  Guest@Example.com  ")
+      appointment.valid?
+      expect(appointment.guest_email).to eq("guest@example.com")
+    end
+
+    it "rejects a guest booking whose email already belongs to a registered user" do
+      create(:user, email: "taken@example.com")
+
+      appointment = build(:appointment, :guest, clinic: clinic, service: service, guest_email: "taken@example.com")
+
+      expect(appointment).not_to be_valid
+      expect(appointment.errors[:guest_email]).to include("is already registered — please log in to book.")
+    end
+
+    it "matches an existing user's email case-insensitively" do
+      create(:user, email: "taken@example.com")
+
+      appointment = build(:appointment, :guest, clinic: clinic, service: service, guest_email: "Taken@Example.com")
+
+      expect(appointment).not_to be_valid
+    end
+
+    it "allows a guest to have active bookings at two different clinics with the same email" do
+      other_clinic = create(:clinic)
+      other_service = create(:service, clinic: other_clinic)
+      create(:appointment, :guest, clinic: clinic, service: service, guest_email: "multi@example.com")
+
+      second = build(:appointment, :guest, clinic: other_clinic, service: other_service, guest_email: "multi@example.com",
+        starts_at: 2.days.from_now.change(hour: 10, min: 0), ends_at: 2.days.from_now.change(hour: 10, min: 30))
+
+      expect(second).to be_valid
+    end
+
+    it "rejects a second active booking at the same clinic under the same guest email" do
+      create(:appointment, :guest, clinic: clinic, service: service, guest_email: "dup@example.com")
+
+      second = build(:appointment, :guest, clinic: clinic, service: service, guest_email: "dup@example.com",
+        starts_at: 2.days.from_now.change(hour: 10, min: 0), ends_at: 2.days.from_now.change(hour: 10, min: 30))
+
+      expect(second).not_to be_valid
+      expect(second.errors[:base]).to include("You already have an active booking at this clinic with this email.")
+    end
+
+    it "allows a second booking at the same clinic once the first is cancelled" do
+      create(:appointment, :guest, clinic: clinic, service: service, guest_email: "dup2@example.com", status: :cancelled)
+
+      second = build(:appointment, :guest, clinic: clinic, service: service, guest_email: "dup2@example.com",
+        starts_at: 2.days.from_now.change(hour: 10, min: 0), ends_at: 2.days.from_now.change(hour: 10, min: 30))
+
+      expect(second).to be_valid
+    end
+
+    it "still enforces the same overlap protection as authenticated bookings" do
+      create(:appointment, :guest, clinic: clinic, service: service, guest_email: "a@example.com",
+        starts_at: Time.zone.parse("2026-09-01 10:00"), ends_at: Time.zone.parse("2026-09-01 10:30"))
+
+      overlapping = build(:appointment, :guest, clinic: clinic, service: service, guest_email: "b@example.com",
+        starts_at: Time.zone.parse("2026-09-01 10:15"), ends_at: Time.zone.parse("2026-09-01 10:45"))
+
+      expect(overlapping).not_to be_valid
+      expect(overlapping.errors[:base]).to include("Someone else just booked that time — please pick a different one.")
+    end
+
+    describe "#contact_name and #contact_email" do
+      it "uses the patient's info when present" do
+        patient = create(:user, name: "Juan Dela Cruz", email: "juan@example.com")
+        appointment = build(:appointment, clinic: clinic, service: service, patient: patient)
+
+        expect(appointment.contact_name).to eq("Juan Dela Cruz")
+        expect(appointment.contact_email).to eq("juan@example.com")
+      end
+
+      it "falls back to guest info when there's no patient" do
+        appointment = build(:appointment, :guest, clinic: clinic, service: service, guest_name: "Maria", guest_email: "maria@example.com")
+
+        expect(appointment.contact_name).to eq("Maria")
+        expect(appointment.contact_email).to eq("maria@example.com")
+      end
+    end
+
+    describe "#guest?" do
+      it "is true when there's no patient" do
+        appointment = build(:appointment, :guest, clinic: clinic, service: service)
+        expect(appointment.guest?).to eq(true)
+      end
+
+      it "is false once a patient is attached (claimed)" do
+        appointment = build(:appointment, :guest, clinic: clinic, service: service, patient: create(:user))
+        expect(appointment.guest?).to eq(false)
+      end
+    end
+  end
+
   describe "audit trail" do
     it "records a created audit when audit_actor is set before save" do
       patient = create(:user)

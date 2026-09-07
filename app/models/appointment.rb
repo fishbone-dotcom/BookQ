@@ -1,5 +1,5 @@
 class Appointment < ApplicationRecord
-  belongs_to :patient, class_name: "User", inverse_of: :patient_appointments
+  belongs_to :patient, class_name: "User", optional: true, inverse_of: :patient_appointments
   belongs_to :clinic
   belongs_to :service
   belongs_to :staff, class_name: "User", optional: true, inverse_of: :staff_appointments
@@ -14,17 +14,42 @@ class Appointment < ApplicationRecord
 
   scope :active, -> { where(status: [ :pending, :confirmed ]) }
 
+  before_validation :normalize_guest_contact_info
+
   validates :starts_at, presence: true
   validates :ends_at, presence: true
   validate :ends_at_after_starts_at
   validate :no_overlapping_appointments
   validate :patient_has_no_other_active_appointment
+  validate :patient_or_guest_contact_present
+  validate :guest_email_not_registered
+  validate :guest_has_no_other_active_appointment_at_clinic
 
   after_create :record_creation_audit
   after_update :record_change_audit, if: :saved_change_to_status_or_schedule?
 
   def active?
     pending? || confirmed?
+  end
+
+  def guest?
+    patient_id.nil?
+  end
+
+  # A guest appointment already claimed by a real account still keeps its
+  # original guest_* fields as a historical record — patient presence is
+  # what actually determines identity everywhere else, so this only matters
+  # for genuinely-unclaimed guest bookings.
+  def contact_name
+    patient&.display_name || guest_name
+  end
+
+  def contact_email
+    patient&.email || guest_email
+  end
+
+  def contact_phone
+    patient&.patient_profile&.phone || guest_phone
   end
 
   def cancel!(by:, reason: nil)
@@ -36,6 +61,12 @@ class Appointment < ApplicationRecord
   end
 
   private
+
+  def normalize_guest_contact_info
+    self.guest_name = guest_name.strip.presence if guest_name.present?
+    self.guest_email = guest_email.strip.downcase.presence if guest_email.present?
+    self.guest_phone = guest_phone.strip.presence if guest_phone.present?
+  end
 
   def record_creation_audit
     audits.create!(action: :created, actor: audit_actor, reason: audit_reason)
@@ -76,5 +107,32 @@ class Appointment < ApplicationRecord
 
     has_active = Appointment.active.where(patient_id: patient_id).where.not(id: id).exists?
     errors.add(:base, "You already have an active booking. Only one active booking is allowed per patient.") if has_active
+  end
+
+  def patient_or_guest_contact_present
+    return if patient.present? || (guest_name.present? && guest_email.present?)
+
+    errors.add(:base, "Please provide your name and email, or sign in.")
+  end
+
+  # A guest booking under an email that already has a real account would let
+  # a stranger create (and, via the tokenized management link, cancel)
+  # appointments that show up on someone else's account without ever
+  # authenticating as them — block it outright and point them at login.
+  def guest_email_not_registered
+    return if patient.present? || guest_email.blank?
+
+    errors.add(:guest_email, "is already registered — please log in to book.") if User.exists?(email: guest_email)
+  end
+
+  # Deliberately per-clinic, not global like the authenticated-patient rule
+  # above — a guest legitimately booking at several different clinics is
+  # normal, but repeatedly holding slots at the same clinic under one email
+  # is the abuse case worth blocking.
+  def guest_has_no_other_active_appointment_at_clinic
+    return if patient.present? || guest_email.blank? || !active?
+
+    has_active = Appointment.active.where(clinic_id: clinic_id, guest_email: guest_email).where.not(id: id).exists?
+    errors.add(:base, "You already have an active booking at this clinic with this email.") if has_active
   end
 end

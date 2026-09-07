@@ -2,10 +2,13 @@
 <% content_for(:back_path, staff_appointments_path(date: @appointment.starts_at.to_date.iso8601)) %>
 
 <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-xl p-3 shadow-sm">
-  <span class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm font-semibold flex-none"><%= initials_for(@appointment.patient) %></span>
+  <span class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm font-semibold flex-none"><%= contact_initials_for(@appointment) %></span>
   <div class="min-w-0 flex-1">
-    <p class="text-sm font-semibold text-gray-900 truncate"><%= @appointment.patient.display_name %></p>
-    <p class="text-xs text-gray-500 truncate"><%= @appointment.patient.email %></p>
+    <p class="text-sm font-semibold text-gray-900 truncate">
+      <%= @appointment.contact_name %>
+      <% if @appointment.guest? %><span class="text-xs font-normal text-gray-400">(guest)</span><% end %>
+    </p>
+    <p class="text-xs text-gray-500 truncate"><%= @appointment.contact_email %></p>
   </div>
   <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-medium shrink-0 <%=
     case @appointment.status

@@ -1,4 +1,4 @@
-Hi <%= @appointment.patient.name.presence || @appointment.patient.email %>,
+Hi <%= @appointment.contact_name %>,
 
 Unfortunately, your appointment<% if @appointment.staff.present? %> with <%= @appointment.staff.name.presence || @appointment.staff.email %><% end %> has had to be cancelled because they've become unavailable:
 

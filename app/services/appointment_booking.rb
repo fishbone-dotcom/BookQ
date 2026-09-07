@@ -15,6 +15,21 @@ class AppointmentBooking
     save(patient.patient_appointments.build(attributes))
   end
 
+  # Same slot-availability and double-booking protection as `create_for` —
+  # both build from the same `attributes`/`anyone_unavailable?`/`save`, so a
+  # guest can't bypass anything an authenticated patient is bound by. The
+  # one-active-booking-per-patient check `create_for` does up front doesn't
+  # apply here (guests have no such global limit — see
+  # Appointment#guest_has_no_other_active_appointment_at_clinic instead,
+  # which is clinic-scoped and enforced at the model layer via `save` below).
+  def create_for_guest(guest_name:, guest_email:, guest_phone:)
+    return failure("Please select a time first.") if starts_at.blank?
+    return failure("No doctor is available at that time — please pick a different one.") if anyone_unavailable?
+
+    appointment = Appointment.new(attributes.merge(guest_name: guest_name, guest_email: guest_email, guest_phone: guest_phone))
+    save(appointment)
+  end
+
   def reschedule(appointment)
     return failure("Please select a time first.") if starts_at.blank?
     return failure("No doctor is available at that time — please pick a different one.") if anyone_unavailable?
