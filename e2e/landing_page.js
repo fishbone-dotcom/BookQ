@@ -1,8 +1,8 @@
 // Verifies the logged-out marketing landing page (Hero / Features / How it
-// works / Closing CTA) renders correctly and the "Continue with Google"
-// button points at the right OmniAuth path. Doesn't complete a real Google
-// login — that isn't automatable and shouldn't be attempted with real
-// credentials in a script.
+// works / tagline banner) renders correctly and that the "Log in" nav link
+// points at the sign-in page (where Google sign-in lives). Doesn't complete
+// a real Google login — that isn't automatable and shouldn't be attempted
+// with real credentials in a script.
 const { launch } = require("./lib/browser");
 const { check, summarize } = require("./lib/check");
 const path = require("path");
@@ -21,7 +21,7 @@ const path = require("path");
   // Hero
   check("hero headline is present", body.includes("A Smarter Way to") && body.includes("Book Clinic Appointments"));
   check("hero has a 'Get Started' button", body.includes("Get Started"));
-  check("hero has a 'continue with Google' link", body.includes("continue with Google"));
+  check("hero mentions no account needed", body.includes("No account needed"));
 
   // Features
   check("features section heading is present", body.includes("Everything a clinic needs to manage bookings"));
@@ -36,9 +36,11 @@ const path = require("path");
   // Illustrated tagline banner
   check("tagline banner is present", body.includes("Better care. Less hassle."));
 
-  // The Google button's form action should point at the omniauth authorize path.
-  const googleForms = await page.locator('form[action*="/users/auth/google_oauth2"]').count();
-  check("a form posts to /users/auth/google_oauth2", googleForms >= 1);
+  // The landing page itself is guest-first now — no Google/email auth
+  // controls on it at all, only the "Log in" nav link, which leads to the
+  // sign-in page where Google sign-in still lives.
+  const navLoginHref = await page.locator('a:has-text("Log in")').first().getAttribute("href");
+  check("nav 'Log in' link points at the sign-in page", navLoginHref === "/users/sign_in");
 
   await page.screenshot({ path: path.join(__dirname, "screenshots", "landing_page.png"), fullPage: true });
 

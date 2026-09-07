@@ -131,11 +131,6 @@
       </a>
 
       <p class="text-xs text-gray-500 mt-3">No account needed. Book as a guest.</p>
-      <p class="text-xs text-gray-400 mt-1">
-        Have an account? <%= link_to "Log in", new_user_session_path, class: "text-emerald-600 hover:underline font-medium" %>
-        or <%= button_to "continue with Google", omniauth_authorize_path(:user, :google_oauth2), data: { turbo: false },
-              class: "inline text-emerald-600 hover:underline font-medium bg-transparent border-0 p-0 cursor-pointer" %>
-      </p>
     </div>
 
     <%# Find a clinic — guest booking entry point, no account required %>
