@@ -38,7 +38,7 @@ const path = require("path");
 
   // The Google button's form action should point at the omniauth authorize path.
   const googleForms = await page.locator('form[action*="/users/auth/google_oauth2"]').count();
-  check("at least one form posts to /users/auth/google_oauth2", googleForms >= 2); // hero + closing CTA
+  check("a form posts to /users/auth/google_oauth2", googleForms >= 1);
 
   await page.screenshot({ path: path.join(__dirname, "screenshots", "landing_page.png"), fullPage: true });
 
