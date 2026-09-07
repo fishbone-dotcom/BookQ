@@ -60,7 +60,7 @@ Rails.application.configure do
   # No domain yet — running off the raw EC2 IP, no HTTPS. Switch this (and
   # config.force_ssl / config.assume_ssl below) to a real domain once one is
   # pointed at the server.
-  config.action_mailer.default_url_options = { host: "54.196.251.193" }
+  config.action_mailer.default_url_options = { host: "98.84.178.27" }
 
   # Specify outgoing SMTP server. Remember to add smtp/* credentials via bin/rails credentials:edit.
   config.action_mailer.smtp_settings = {
@@ -84,7 +84,7 @@ Rails.application.configure do
 
   # Enable DNS rebinding protection and other `Host` header attacks.
   # No domain yet, so allow the raw EC2 IP — add the domain here once one exists.
-  config.hosts << "54.196.251.193"
+  config.hosts << "98.84.178.27"
 
   # Skip DNS rebinding protection for the default health check endpoint.
   config.host_authorization = { exclude: ->(request) { request.path == "/up" } }

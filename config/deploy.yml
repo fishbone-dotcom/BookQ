@@ -2,12 +2,12 @@
 service: book_q
 
 # Name of the container image (use your-user/app-name on external registries).
-image: book_q
+image: noel397/book_q
 
 # Deploy to these servers.
 servers:
   web:
-    - 54.196.251.193
+    - 98.84.178.27
   # job:
   #   hosts:
   #     - 192.168.0.1
@@ -79,7 +79,7 @@ builder:
 
   # Build image via remote server — needed because the machine running `kamal`
   # here has no local Docker daemon available.
-  remote: ssh://ec2-user@54.196.251.193
+  remote: ssh://ec2-user@98.84.178.27
   #
   # # Pass arguments and secrets to the Docker build process
   # args:
