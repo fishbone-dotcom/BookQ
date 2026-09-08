@@ -9,7 +9,9 @@ module Admin
       @total_appointments = Appointment.count
 
       @recent_appointments = Appointment.includes(:patient, :clinic, :service, :staff)
-        .order(starts_at: :desc)
+        .where(starts_at: Time.current..)
+        .where.not(status: :cancelled)
+        .order(starts_at: :asc)
         .limit(RECENT_LIMIT)
     end
   end
