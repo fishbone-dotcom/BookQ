@@ -38,6 +38,7 @@ gem "kamal", require: false
 gem "devise"
 gem "omniauth-google-oauth2"
 gem "omniauth-rails_csrf_protection"
+gem "stripe"
 
 # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
 gem "thruster", require: false

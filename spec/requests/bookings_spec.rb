@@ -7,14 +7,16 @@ RSpec.describe "Bookings", type: :request do
   let(:clinic) { create(:clinic) }
   let(:service) { create(:service, clinic: clinic, duration_minutes: 30) }
   let(:monday) { Date.current.next_occurring(:monday) }
+  let(:fake_session) { Stripe::Checkout::Session.construct_from(id: "cs_test_123", url: "https://checkout.stripe.com/pay/cs_test_123") }
 
   before do
     create(:availability, clinic: clinic, day_of_week: :monday, start_time: "09:00", end_time: "17:00")
     sign_in patient
+    allow(Stripe::Checkout::Session).to receive(:create).and_return(fake_session)
   end
 
   describe "POST /clinics/:clinic_id/booking" do
-    it "books the appointment and redirects to the home page" do
+    it "books the appointment and redirects to Stripe Checkout when the service has a price" do
       starts_at = monday.in_time_zone.change(hour: 9, min: 0)
 
       expect {
@@ -23,9 +25,27 @@ RSpec.describe "Bookings", type: :request do
         }
       }.to change(Appointment, :count).by(1)
 
+      expect(response).to redirect_to(fake_session.url)
+      appointment = Appointment.last
+      expect(appointment.payment).to be_pending
+      expect(appointment.payment.amount).to eq(service.price)
+    end
+
+    it "books the appointment immediately with no Stripe call when the service is free" do
+      free_service = create(:service, clinic: clinic, duration_minutes: 30, price: nil)
+      starts_at = monday.in_time_zone.change(hour: 9, min: 0)
+
+      expect {
+        post clinic_booking_path(clinic), params: {
+          service_id: free_service.id, date: monday.iso8601, month: monday.strftime("%Y-%m"), starts_at: starts_at.iso8601
+        }
+      }.to change(Appointment, :count).by(1)
+
+      expect(Stripe::Checkout::Session).not_to have_received(:create)
       expect(response).to redirect_to(root_path)
       follow_redirect!
       expect(response.body).to include("Your appointment is booked")
+      expect(Appointment.last.payment).to be_nil
     end
 
     it "redirects back with the date preserved when the patient already has an active booking" do
@@ -56,6 +76,26 @@ RSpec.describe "Bookings", type: :request do
     end
   end
 
+  describe "GET /booking/return" do
+    it "marks the payment paid and lands the patient on the confirmation flash once Stripe confirms" do
+      starts_at = monday.in_time_zone.change(hour: 9, min: 0)
+      post clinic_booking_path(clinic), params: {
+        service_id: service.id, date: monday.iso8601, month: monday.strftime("%Y-%m"), starts_at: starts_at.iso8601
+      }
+      payment = Appointment.last.payment
+      allow(Stripe::Checkout::Session).to receive(:retrieve).and_return(
+        Stripe::Checkout::Session.construct_from(payment_status: "paid", payment_intent: "pi_123")
+      )
+
+      get booking_payment_return_path(session_id: payment.stripe_checkout_session_id)
+
+      expect(payment.reload).to be_paid
+      expect(response).to redirect_to(root_path)
+      follow_redirect!
+      expect(response.body).to include("Your appointment is booked")
+    end
+  end
+
   describe "guest booking (signed out)" do
     before { sign_out patient }
 
@@ -70,29 +110,40 @@ RSpec.describe "Bookings", type: :request do
     end
 
     describe "POST /clinics/:clinic_id/booking" do
-      it "creates a guest appointment, sends a confirmation email, and redirects to the guest management page" do
+      it "creates a guest appointment and redirects to Stripe Checkout, without mailing yet" do
         starts_at = monday.in_time_zone.change(hour: 9, min: 0)
 
         expect {
           expect {
-            perform_enqueued_jobs do
-              post clinic_booking_path(clinic), params: {
-                service_id: service.id, date: monday.iso8601, month: monday.strftime("%Y-%m"), starts_at: starts_at.iso8601,
-                guest_name: "Maria Santos", guest_email: "maria@example.com", guest_phone: "09171234567"
-              }
-            end
+            post clinic_booking_path(clinic), params: {
+              service_id: service.id, date: monday.iso8601, month: monday.strftime("%Y-%m"), starts_at: starts_at.iso8601,
+              guest_name: "Maria Santos", guest_email: "maria@example.com", guest_phone: "09171234567"
+            }
           }.to change(Appointment, :count).by(1)
-        }.to change { ActionMailer::Base.deliveries.count }.by(1)
+        }.not_to change { ActionMailer::Base.deliveries.count }
 
         appointment = Appointment.last
         expect(appointment.guest?).to eq(true)
         expect(appointment.guest_name).to eq("Maria Santos")
         expect(appointment.guest_email).to eq("maria@example.com")
+        expect(appointment.payment).to be_pending
+        expect(response).to redirect_to(fake_session.url)
+      end
 
-        # signed_id embeds an expiry timestamp, so re-generating one here for
-        # comparison would flake on millisecond drift — instead extract the
-        # token the controller actually redirected to and confirm it
-        # resolves back to this same appointment.
+      it "sends the guest confirmation email once Stripe confirms payment via the return URL" do
+        free_service = create(:service, clinic: clinic, duration_minutes: 30, price: nil)
+        starts_at = monday.in_time_zone.change(hour: 9, min: 0)
+
+        expect {
+          perform_enqueued_jobs do
+            post clinic_booking_path(clinic), params: {
+              service_id: free_service.id, date: monday.iso8601, month: monday.strftime("%Y-%m"), starts_at: starts_at.iso8601,
+              guest_name: "Maria Santos", guest_email: "maria@example.com", guest_phone: "09171234567"
+            }
+          end
+        }.to change { ActionMailer::Base.deliveries.count }.by(1)
+
+        appointment = Appointment.last
         redirected_token = response.location.split("/guest_appointments/").last
         expect(Appointment.find_signed(redirected_token, purpose: :guest_management)).to eq(appointment)
       end

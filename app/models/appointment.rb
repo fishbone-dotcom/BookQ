@@ -5,6 +5,7 @@ class Appointment < ApplicationRecord
   belongs_to :staff, class_name: "User", optional: true, inverse_of: :staff_appointments
 
   has_many :audits, class_name: "AppointmentAudit", dependent: :destroy
+  has_one :payment, dependent: :destroy
 
   # Transient — set by a caller right before save/update! so the audit
   # callbacks below know who's acting and (optionally) why. Not persisted.
@@ -34,6 +35,10 @@ class Appointment < ApplicationRecord
 
   def guest?
     patient_id.nil?
+  end
+
+  def payment_required?
+    service.price.present? && service.price.positive?
   end
 
   # A guest appointment already claimed by a real account still keeps its

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_07_170435) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_10_040347) do
   create_table "appointment_audits", force: :cascade do |t|
     t.integer "action", null: false
     t.integer "actor_id"
@@ -100,6 +100,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_170435) do
     t.index ["user_id"], name: "index_patient_profiles_on_user_id", unique: true
   end
 
+  create_table "payments", force: :cascade do |t|
+    t.decimal "amount", precision: 10, scale: 2, null: false
+    t.integer "appointment_id", null: false
+    t.integer "clinic_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "status", default: 0, null: false
+    t.string "stripe_checkout_session_id", null: false
+    t.string "stripe_payment_intent_id"
+    t.datetime "updated_at", null: false
+    t.index ["appointment_id"], name: "index_payments_on_appointment_id"
+    t.index ["clinic_id"], name: "index_payments_on_clinic_id"
+    t.index ["stripe_checkout_session_id"], name: "index_payments_on_stripe_checkout_session_id", unique: true
+  end
+
   create_table "services", force: :cascade do |t|
     t.integer "clinic_id", null: false
     t.datetime "created_at", null: false
@@ -139,5 +153,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_170435) do
   add_foreign_key "clinic_staffs", "users"
   add_foreign_key "clinics", "users", column: "owner_id"
   add_foreign_key "patient_profiles", "users"
+  add_foreign_key "payments", "appointments"
+  add_foreign_key "payments", "clinics"
   add_foreign_key "services", "clinics"
 end

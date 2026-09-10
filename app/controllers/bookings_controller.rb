@@ -1,5 +1,5 @@
 class BookingsController < ApplicationController
-  before_action :set_clinic
+  before_action :set_clinic, except: :payment_return
 
   def show
     load_booking_context
@@ -9,21 +9,50 @@ class BookingsController < ApplicationController
     if user_signed_in?
       result = AppointmentBooking.new(clinic: @clinic, params: params, actor: current_user).create_for(current_user)
       return redirect_to_booking(alert: result.error) unless result.success?
-
-      redirect_to root_path, notice: "Your appointment is booked for #{I18n.l(result.appointment.starts_at, format: :long)}."
     else
       result = AppointmentBooking.new(clinic: @clinic, params: params, actor: nil).create_for_guest(
         guest_name: params[:guest_name], guest_email: params[:guest_email], guest_phone: params[:guest_phone]
       )
       return redirect_to_booking(alert: result.error) unless result.success?
-
-      AppointmentMailer.confirmation(result.appointment).deliver_later
-      redirect_to guest_appointment_path(result.appointment.signed_id(purpose: :guest_management, expires_in: 60.days)),
-        notice: "Appointment confirmed!"
     end
+
+    redirect_after_booking(result.appointment)
+  end
+
+  # Landing point for Stripe's Checkout success_url — reconciles immediately
+  # so the user doesn't have to wait on webhook delivery to see confirmation.
+  # The (unguessable) Stripe session id is the capability token here, since a
+  # guest has no session to check ownership against.
+  def payment_return
+    payment = Payment.find_by!(stripe_checkout_session_id: params[:session_id])
+    session = Stripe::Checkout::Session.retrieve(payment.stripe_checkout_session_id)
+    payment.mark_paid!(payment_intent_id: session.payment_intent) if session.payment_status == "paid"
+
+    redirect_after_booking(payment.appointment.reload)
   end
 
   private
+
+  def redirect_after_booking(appointment)
+    if appointment.cancelled?
+      redirect_to root_path, alert: "This booking was cancelled because payment wasn't completed in time."
+    elsif appointment.payment_required? && !appointment.payment&.paid?
+      return redirect_to root_path, alert: "Payment is still pending — please complete checkout." if appointment.payment&.pending?
+
+      checkout = AppointmentCheckout.create_for(appointment,
+        success_url: booking_payment_return_url(session_id: "{CHECKOUT_SESSION_ID}"),
+        cancel_url: clinic_booking_url(appointment.clinic, alert: "Payment cancelled — your slot was released."))
+      return redirect_to_booking(alert: checkout.error) unless checkout.success?
+
+      redirect_to checkout.checkout_url, allow_other_host: true
+    elsif appointment.patient.present?
+      redirect_to root_path, notice: "Your appointment is booked for #{I18n.l(appointment.starts_at, format: :long)}."
+    else
+      AppointmentMailer.confirmation(appointment).deliver_later unless appointment.payment_required?
+      redirect_to guest_appointment_path(appointment.signed_id(purpose: :guest_management, expires_in: 60.days)),
+        notice: "Appointment confirmed!"
+    end
+  end
 
   def redirect_to_booking(keep_date: true, **flash)
     redirect_to clinic_booking_path(@clinic, service_id: params[:service_id], month: params[:month],

@@ -7,6 +7,8 @@ Rails.application.routes.draw do
   resources :clinics, only: [] do
     resource :booking, only: [ :show, :create ], controller: "bookings"
   end
+  get "booking/return", to: "bookings#payment_return", as: :booking_payment_return
+  post "webhooks/stripe", to: "stripe_webhooks#create"
 
   resources :appointments, only: [ :update ] do
     member do

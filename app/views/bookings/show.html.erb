@@ -254,15 +254,26 @@
               </div>
             <% end %>
           </dl>
+
+          <% if @service.price.present? && @service.price.positive? && !@editing_appointment %>
+            <p class="text-xs text-gray-500 mb-4">You'll be redirected to Stripe to complete payment before your slot is confirmed.</p>
+          <% end %>
         </div>
 
         <!-- Nav buttons -->
+        <% submit_label = if @editing_appointment
+             "Update"
+           elsif @service.price.present? && @service.price.positive?
+             "Book & Pay #{number_to_currency(@service.price, unit: "₱", precision: 2)}"
+           else
+             "Book"
+           end %>
         <div class="flex gap-3 mt-2">
           <button type="button" data-booking-wizard-target="backButton" data-action="click->booking-wizard#back"
                 class="flex-1 border border-gray-300 text-gray-700 font-medium py-2.5 rounded-xl cursor-pointer hover:bg-gray-50 transition">← Back</button>
           <button type="button" data-booking-wizard-target="nextButton" data-action="click->booking-wizard#next"
                 class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl cursor-pointer transition disabled:opacity-40 disabled:cursor-not-allowed">Next</button>
-          <%= f.submit @editing_appointment ? "Update" : "Book", data: { "booking-wizard-target": "submitButton" }, class: "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl cursor-pointer transition hidden" %>
+          <%= f.submit submit_label, data: { "booking-wizard-target": "submitButton" }, class: "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl cursor-pointer transition hidden" %>
         </div>
       <% end %>
     </div>
